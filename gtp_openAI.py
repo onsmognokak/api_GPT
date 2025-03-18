@@ -15,14 +15,13 @@ class ApiKeyCheckWorker(QObject):
         self.api_key = api_key
 
     def run(self):
-        # Set the API key and try listing models to check its validity.
         openai.api_key = self.api_key
         try:
+            # Use a simple call to list models to verify the key.
             openai.Model.list()
             self.finished.emit(True, "")
         except Exception as e:
             self.finished.emit(False, str(e))
-
 
 # --- Worker for streaming chat completions ---
 class ChatWorker(QObject):
@@ -38,7 +37,6 @@ class ChatWorker(QObject):
     def run(self):
         openai.api_key = self.api_key
         try:
-            # Using stream=True to receive tokens as they are generated.
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=self.messages,
@@ -53,10 +51,8 @@ class ChatWorker(QObject):
         except Exception as e:
             self.errorOccurred.emit(str(e))
 
-
 # --- Login Screen ---
 class LoginScreen(QWidget):
-    # Signal to tell the application to switch screens after a successful save.
     switchScreen = Signal()
 
     def __init__(self):
@@ -66,12 +62,18 @@ class LoginScreen(QWidget):
         self.api_key = ""
 
         layout = QVBoxLayout()
-
-        # API key input
+        layout.setAlignment(Qt.AlignCenter)
+        
+        # API key label and input field
         layout.addWidget(QLabel("API Key:"))
         self.api_key_input = QLineEdit()
-        self.api_key_input.setPlaceholderText("Enter API key")
+        self.api_key_input.setPlaceholderText("XXXX-XXXX-XXXX")
+        self.api_key_input.setEchoMode(QLineEdit.Password)  # Hide characters
         layout.addWidget(self.api_key_input)
+
+        # Format instruction label
+        format_label = QLabel("Expected Format: XXXX-XXXX-XXXX")
+        layout.addWidget(format_label)
 
         # Buttons layout: Check and Save
         btn_layout = QHBoxLayout()
@@ -84,7 +86,7 @@ class LoginScreen(QWidget):
 
         self.setLayout(layout)
 
-        # Connect signals
+        # Connect button clicks to functions.
         self.check_btn.clicked.connect(self.check_api_key)
         self.save_btn.clicked.connect(self.save_api_key)
 
@@ -95,7 +97,7 @@ class LoginScreen(QWidget):
             return
 
         self.check_btn.setEnabled(False)
-        # Run API key check in a separate thread
+        # Check the API key on a separate thread.
         self.thread = QThread()
         self.worker = ApiKeyCheckWorker(self.api_key)
         self.worker.moveToThread(self.thread)
@@ -115,17 +117,17 @@ class LoginScreen(QWidget):
         else:
             self.valid_api_key = False
             self.save_btn.setEnabled(False)
-            QMessageBox.warning(self, "Error", f"Invalid API key:\n{error_msg}")
+            # Display an error message if the key verification fails.
+            QMessageBox.critical(self, "Error", f"Invalid API key:\n{error_msg}")
 
     def save_api_key(self):
         if self.valid_api_key:
-            # Save the API key using QSettings (saves to OS-specific location)
+            # Save the API key using QSettings.
             settings = QSettings("MyCompany", "llm_name_app")
             settings.setValue("api_key", self.api_key)
             settings.sync()
             QMessageBox.information(self, "Success", "API key saved successfully!")
             self.switchScreen.emit()
-
 
 # --- Chat Screen ---
 class ChatScreen(QWidget):
@@ -139,7 +141,7 @@ class ChatScreen(QWidget):
         self.chat_history.setReadOnly(True)
         layout.addWidget(self.chat_history)
 
-        # Input field for user text
+        # Input field for user's text
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("Type your message here...")
         layout.addWidget(self.input_field)
@@ -154,11 +156,10 @@ class ChatScreen(QWidget):
         self.send_btn.clicked.connect(self.send_message)
         self.input_field.returnPressed.connect(self.send_message)
 
-        # Load API key from settings
+        # Load API key from settings.
         settings = QSettings("MyCompany", "llm_name_app")
         self.api_key = settings.value("api_key", "")
         self.conversation = []
-        # To store the ongoing assistant response text.
         self.current_assistant_text = ""
 
     def send_message(self):
@@ -166,20 +167,16 @@ class ChatScreen(QWidget):
         if not user_message:
             return
 
-        # Append user's message to chat history.
         self.append_chat("User", user_message)
         self.conversation.append({"role": "user", "content": user_message})
         self.input_field.clear()
 
-        # Disable input until response is received.
         self.send_btn.setEnabled(False)
         self.input_field.setEnabled(False)
-
-        # Append an empty placeholder for assistant response.
         self.append_chat("Assistant", "")
         self.current_assistant_text = ""
 
-        # Start ChatWorker in a new thread.
+        # Start the ChatWorker in a new thread.
         self.thread = QThread()
         self.chat_worker = ChatWorker(self.conversation, self.api_key)
         self.chat_worker.moveToThread(self.thread)
@@ -193,12 +190,10 @@ class ChatScreen(QWidget):
         self.thread.start()
 
     def append_chat(self, sender, message):
-        # Append sender and message to the chat history.
         self.chat_history.append(f"<b>{sender}:</b> {message}")
 
     def update_assistant_message(self, token):
         self.current_assistant_text += token
-        # Move cursor to end and insert token without newlines.
         cursor = self.chat_history.textCursor()
         cursor.movePosition(cursor.End)
         cursor.insertPlainText(token)
@@ -206,19 +201,15 @@ class ChatScreen(QWidget):
         self.chat_history.ensureCursorVisible()
 
     def on_chat_finished(self):
-        # Re-enable input controls.
         self.send_btn.setEnabled(True)
         self.input_field.setEnabled(True)
-        # Save the complete assistant response to conversation history.
         self.conversation.append({"role": "assistant", "content": self.current_assistant_text})
-        # Optionally, add a new line after response.
         self.chat_history.append("")
 
     def on_chat_error(self, error_msg):
         QMessageBox.warning(self, "Error", f"Error in chat: {error_msg}")
         self.send_btn.setEnabled(True)
         self.input_field.setEnabled(True)
-
 
 # --- Main Window that switches between screens ---
 class MainWindow(QStackedWidget):
@@ -231,15 +222,17 @@ class MainWindow(QStackedWidget):
         self.addWidget(self.chat_screen)
 
         self.login_screen.switchScreen.connect(self.show_chat_screen)
+        # Set a reduced size for the login screen.
+        self.setFixedSize(320, 180)
 
     def show_chat_screen(self):
         self.setCurrentWidget(self.chat_screen)
-
+        # Resize window for the chat interface.
+        self.setFixedSize(600, 400)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.setWindowTitle("llm_name")
-    window.resize(600, 400)
     window.show()
     sys.exit(app.exec())
