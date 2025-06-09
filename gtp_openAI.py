@@ -6,10 +6,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QThread, Signal, QObject, QSettings, Qt
 
-# --- Worker for API key check ---
-class ApiKeyCheckWorker(QObject):
-    finished = Signal(bool, str)  # (success, error message)
 
+class ApiKeyCheckWorker(QObject):
+    finished = Signal(bool, str)
+    
     def __init__(self, api_key):
         super().__init__()
         self.api_key = api_key
@@ -17,13 +17,13 @@ class ApiKeyCheckWorker(QObject):
     def run(self):
         openai.api_key = self.api_key
         try:
-            # Use a simple call to list models to verify the key.
+            
             openai.Model.list()
             self.finished.emit(True, "")
         except Exception as e:
             self.finished.emit(False, str(e))
 
-# --- Worker for streaming chat completions ---
+
 class ChatWorker(QObject):
     tokenReceived = Signal(str)
     finished = Signal()
@@ -97,7 +97,6 @@ class LoginScreen(QWidget):
             return
 
         self.check_btn.setEnabled(False)
-        # Check the API key on a separate thread.
         self.thread = QThread()
         self.worker = ApiKeyCheckWorker(self.api_key)
         self.worker.moveToThread(self.thread)
