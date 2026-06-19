@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gothic Remake Lockpick Solver</title>
+  <style>
+    :root{--bg:#15100d;--card:#211913;--card2:#2c2119;--line:#49382b;--text:#f7ebdc;--muted:#b7a696;--gold:#f0c46f;--red:#df8062}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,rgba(240,196,111,.16),transparent 34rem),linear-gradient(135deg,#100c09,#1b130f 65%,#0f0c0a);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{width:min(1180px,calc(100% - 32px));margin:auto;padding:32px 0 52px}.hero,.card{border:1px solid var(--line);border-radius:24px;background:rgba(33,25,19,.92);box-shadow:0 24px 70px rgba(0,0,0,.32)}.hero{display:flex;justify-content:space-between;gap:20px;padding:30px;margin-bottom:18px}.kicker{margin:0 0 10px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}h1{margin:0 0 12px;font-size:clamp(30px,5vw,52px);line-height:1.02}h2{margin:0 0 8px;font-size:21px}p{margin-top:0}.muted{color:var(--muted);line-height:1.55}.card{padding:22px}.top,.solve{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:18px}.grid{display:grid;grid-template-columns:.9fr 1.25fr;gap:18px;margin-bottom:18px}.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;align-items:end}label{display:grid;gap:7px;color:var(--muted);font-size:14px}select,input{min-width:155px;border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:var(--card2);color:var(--text);font:inherit}button{border:0;border-radius:15px;padding:12px 15px;background:#392b21;color:var(--text);font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--gold);color:#160f09}.secondary{background:#30241c}.help{border:1px solid var(--line);background:transparent}.chart{min-height:320px;overflow:auto}.plate-label{fill:var(--muted);font-weight:800;font-size:13px}.slot{fill:#3a2d23;stroke:var(--line);stroke-width:1.5;cursor:pointer}.slot.target{fill:#60482f}.slot.active{fill:var(--gold);stroke:#fff0ca;stroke-width:2.5}.slot-text{fill:var(--text);font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none}.table-wrap{overflow:auto;margin-top:14px}table{width:100%;min-width:520px;border-collapse:collapse}th,td{border:1px solid var(--line);padding:8px;text-align:center}th{color:var(--muted);background:rgba(255,255,255,.03);font-size:13px}.cell{width:100%;min-width:52px;padding:10px 8px}.same{background:var(--gold);color:#170f09}.opp{background:var(--red);color:#1b0d08}.none{background:#31251d}.result{margin-top:18px}.seq{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:#19120e;font-size:clamp(19px,3vw,30px);line-height:1.55;word-break:break-word}ol{line-height:1.65}dialog{width:min(640px,calc(100% - 32px));border:1px solid var(--line);border-radius:22px;background:var(--card);color:var(--text);padding:22px}dialog::backdrop{background:rgba(0,0,0,.64)}.dialog-head{display:flex;justify-content:space-between;gap:12px}.x{width:38px;height:38px;border-radius:50%;padding:0;font-size:24px}@media(max-width:900px){.hero,.top,.solve{flex-direction:column;align-items:stretch}.grid{grid-template-columns:1fr}.controls{justify-content:stretch}select,input,.primary{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <p class="kicker">Gothic Remake helper</p>
+        <h1>Решатель замков с пластинами</h1>
+        <p class="muted">Введи стартовые положения и связи между пластинами. Приложение найдёт порядок ходов, чтобы вывести все пластины в центральный четвёртый слот.</p>
+      </div>
+      <button class="help" id="helpBtn">Как пользоваться</button>
+    </section>
+
+    <section class="card top">
+      <div>
+        <h2>1. Настрой замок</h2>
+        <p class="muted">Пластин может быть от 3 до 6. У каждой 7 слотов, цель — слот 4.</p>
+      </div>
+      <div class="controls">
+        <label>Количество пластин<select id="count"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+        <label>Лимит ходов<input id="limit" type="number" min="1" max="120" value="60"></label>
+        <button id="demo">Пример</button><button class="secondary" id="reset">Сброс</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <h2>2. Начальные положения</h2>
+        <p class="muted">Нажми на слот каждой пластины. Жёлтый слот — текущее положение.</p>
+        <div id="chart" class="chart"></div>
+      </section>
+      <section class="card">
+        <h2>3. Связи между пластинами</h2>
+        <p class="muted">Строка — какую пластину двигаем вправо. Столбец — какая пластина меняется. Ячейка переключается по клику: нет связи, вправо, влево.</p>
+        <div class="table-wrap"><table id="matrix"></table></div>
+      </section>
+    </section>
+
+    <section class="card solve">
+      <div>
+        <h2>4. Получить последовательность</h2>
+        <p class="muted">Решатель перебирает допустимые состояния. Ход отбрасывается, если пластина выходит за границы 1–7.</p>
+      </div>
+      <button class="primary" id="solve">Решить замок</button>
+    </section>
+
+    <section class="card result" id="result" hidden>
+      <h2>Результат</h2>
+      <div id="summary" class="muted"></div>
+      <div id="sequence" class="seq"></div>
+      <ol id="steps"></ol>
+    </section>
+  </main>
+
+  <dialog id="dialog">
+    <div class="dialog-head"><h2>Как пользоваться</h2><button class="x" id="closeDialog">×</button></div>
+    <ol>
+      <li>Выбери количество пластин.</li>
+      <li>Отметь стартовый слот каждой пластины.</li>
+      <li>Заполни таблицу влияний для движения вправо.</li>
+      <li>Нажми «Решить замок» и повтори последовательность стрелок в игре.</li>
+    </ol>
+    <p class="muted">Пример: если при движении пластины 1 вправо пластина 3 уходит влево, в строке «Пластина 1» и столбце «Пластина 3» поставь «←».</p>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+    const MIN=1,MAX=7,CENTER=4;let n=4,pos=[2,5,6,3],inf=[];
+    const $=id=>document.getElementById(id), els={count:$('count'),limit:$('limit'),chart:$('chart'),matrix:$('matrix'),result:$('result'),summary:$('summary'),seq:$('sequence'),steps:$('steps')};
+    const defaults=c=>Array.from({length:c},(_,r)=>Array.from({length:c},(_,col)=>r===col?1:0));
+    function normalize(c){n=Math.max(3,Math.min(6,c));pos=Array.from({length:n},(_,i)=>pos[i]??CENTER);const old=inf.length?inf:defaults(n);inf=Array.from({length:n},(_,r)=>Array.from({length:n},(_,col)=>Number.isInteger(old[r]?.[col])?old[r][col]:(r===col?1:0)))}
+    function clear(){els.result.hidden=true;els.summary.textContent='';els.seq.textContent='';els.steps.innerHTML=''}
+    function render(){renderChart();renderMatrix()}
+    function renderChart(){els.chart.innerHTML='';if(!window.d3){els.chart.textContent='D3.js не загрузился. Проверь интернет и обнови страницу.';return}const w=Math.max(330,n*82+24),h=310,sw=52,sh=28,gap=7,top=46;const svg=d3.select(els.chart).append('svg').attr('viewBox',`0 0 ${w} ${h}`).attr('width',w).attr('height',h);const groups=svg.selectAll('g.plate').data(pos).join('g').attr('transform',(_,i)=>`translate(${22+i*82},0)`);groups.append('text').attr('class','plate-label').attr('x',sw/2).attr('y',20).attr('text-anchor','middle').text((_,i)=>`Пластина ${i+1}`);groups.each(function(p,i){const slots=Array.from({length:MAX},(_,k)=>k+1);const sg=d3.select(this).selectAll('g.slotg').data(slots).join('g').attr('transform',s=>`translate(0,${top+(s-1)*(sh+gap)})`).on('click',(_,s)=>{pos[i]=s;clear();renderChart()});sg.append('rect').attr('class',s=>['slot',s===CENTER?'target':'',s===p?'active':''].join(' ')).attr('rx',10).attr('width',sw).attr('height',sh);sg.append('text').attr('class','slot-text').attr('x',sw/2).attr('y',sh/2+1).text(s=>s)})}
+    function label(v){return v===1?'→':v===-1?'←':'—'}function cls(v){return v===1?'same':v===-1?'opp':'none'}function next(v){return v===0?1:v===1?-1:0}
+    function th(t){const e=document.createElement('th');e.textContent=t;return e}
+    function renderMatrix(){els.matrix.innerHTML='';const thead=document.createElement('thead'),hr=document.createElement('tr');hr.appendChild(th('Двигаем вправо'));for(let c=0;c<n;c++)hr.appendChild(th(`Пластина ${c+1}`));thead.appendChild(hr);els.matrix.appendChild(thead);const tb=document.createElement('tbody');for(let r=0;r<n;r++){const tr=document.createElement('tr');tr.appendChild(th(`Пластина ${r+1}`));for(let c=0;c<n;c++){const td=document.createElement('td'),b=document.createElement('button');b.type='button';b.className=`cell ${cls(inf[r][c])}`;b.textContent=label(inf[r][c]);b.onclick=()=>{inf[r][c]=next(inf[r][c]);clear();renderMatrix()};td.appendChild(b);tr.appendChild(td)}tb.appendChild(tr)}els.matrix.appendChild(tb)}
+    const key=s=>s.join(',');
+    function apply(s,plate,dir){const nxt=s.map((p,j)=>p+dir*inf[plate][j]);return nxt.every(x=>x>=MIN&&x<=MAX)?nxt:null}
+    function solveModel(maxDepth){const start=key(pos),target=key(Array.from({length:n},()=>CENTER));if(start===target)return{ok:true,moves:[],seen:1};const q=[pos.slice()],prev=new Map([[start,null]]),depth=new Map([[start,0]]);let qi=0;while(qi<q.length){const cur=q[qi++],curKey=key(cur),d=depth.get(curKey);if(d>=maxDepth)continue;for(let plate=0;plate<n;plate++){for(const dir of [1,-1]){const nxt=apply(cur,plate,dir);if(!nxt)continue;const nk=key(nxt);if(prev.has(nk))continue;prev.set(nk,{prev:curKey,move:{plate,dir}});depth.set(nk,d+1);if(nk===target){const moves=[];let k=nk;while(prev.get(k)){const item=prev.get(k);moves.push(item.move);k=item.prev}return{ok:true,moves:moves.reverse(),seen:prev.size}}q.push(nxt)}}}return{ok:false,moves:[],seen:prev.size}}
+    function controller(moves){let selected=0,all=[],steps=[];moves.forEach((m,i)=>{const nav=[],diff=m.plate-selected;if(diff>0)nav.push(...Array.from({length:diff},()=> '↑'));if(diff<0)nav.push(...Array.from({length:-diff},()=> '↓'));const action=m.dir===1?'→':'←';all.push(...nav,action);selected=m.plate;steps.push({i:i+1,plate:m.plate+1,nav,action})});return{all,steps}}
+    function showSolution(){clear();const maxDepth=parseInt(els.limit.value,10)||60,res=solveModel(maxDepth);els.result.hidden=false;if(!res.ok){els.summary.innerHTML=`Решение не найдено до глубины <b>${maxDepth}</b> ходов. Проверено состояний: <b>${res.seen}</b>. Проверь связи или увеличь лимит.`;els.seq.textContent='—';return}const out=controller(res.moves);els.summary.innerHTML=`Найдено решение: <b>${res.moves.length}</b> движений пластин. Проверено состояний: <b>${res.seen}</b>. Старт выбора считается с пластины 1.`;els.seq.textContent=out.all.length?out.all.join(' '):'Замок уже отцентрирован';els.steps.innerHTML='';out.steps.forEach(s=>{const li=document.createElement('li');li.innerHTML=`Выбрать пластину <b>${s.plate}</b>: ${s.nav.length?s.nav.join(' ')+' ':''}<b>${s.action}</b>`;els.steps.appendChild(li)})}
+    function demo(){n=5;pos=[2,5,6,3,7];inf=[[1,0,-1,0,0],[0,1,0,1,0],[0,-1,1,0,0],[1,0,0,1,-1],[0,0,1,0,1]];els.count.value='5';clear();render()}
+    function reset(){const c=parseInt(els.count.value,10)||4;n=c;pos=Array.from({length:n},()=>CENTER);inf=defaults(n);clear();render()}
+    els.count.onchange=()=>{normalize(parseInt(els.count.value,10)||4);clear();render()};$('solve').onclick=showSolution;$('demo').onclick=demo;$('reset').onclick=reset;$('helpBtn').onclick=()=>$('dialog').showModal();$('closeDialog').onclick=()=>$('dialog').close();normalize(n);render();
+  </script>
+</body>
+</html>
