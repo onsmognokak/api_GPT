@@ -5,228 +5,353 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gothic Remake Plate Puzzle Solver</title>
   <style>
-    :root{--bg:#15100d;--card:#211913;--card2:#2c2119;--line:#49382b;--text:#f7ebdc;--muted:#b7a696;--gold:#f0c46f;--red:#df8062;--green:#93d18b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,rgba(240,196,111,.16),transparent 34rem),linear-gradient(135deg,#100c09,#1b130f 65%,#0f0c0a);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{width:min(1240px,calc(100% - 32px));margin:auto;padding:32px 0 52px}.hero,.card{border:1px solid var(--line);border-radius:24px;background:rgba(33,25,19,.92);box-shadow:0 24px 70px rgba(0,0,0,.32)}.hero{display:flex;justify-content:space-between;gap:20px;padding:30px;margin-bottom:18px}.kicker{margin:0 0 10px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}h1{margin:0 0 12px;font-size:clamp(30px,5vw,52px);line-height:1.02}h2{margin:0 0 8px;font-size:21px}p{margin-top:0}.muted{color:var(--muted);line-height:1.55}.notice{border:1px solid var(--line);border-radius:16px;background:#19120e;padding:12px 14px;margin-top:12px;color:var(--muted);line-height:1.45}.card{padding:22px}.top,.solve{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:18px}.grid{display:grid;grid-template-columns:.9fr 1.25fr;gap:18px;margin-bottom:18px}.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;align-items:end}label{display:grid;gap:7px;color:var(--muted);font-size:14px}select,input{min-width:155px;border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:var(--card2);color:var(--text);font:inherit}button{border:0;border-radius:15px;padding:12px 15px;background:#392b21;color:var(--text);font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--gold);color:#160f09}.secondary{background:#30241c}.help{border:1px solid var(--line);background:transparent}.chart{min-height:320px;overflow:auto}.plate-label{fill:var(--muted);font-weight:800;font-size:13px}.slot{fill:#3a2d23;stroke:var(--line);stroke-width:1.5;cursor:pointer}.slot.target{fill:#60482f}.slot.active{fill:var(--gold);stroke:#fff0ca;stroke-width:2.5}.slot-text{fill:var(--text);font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none}.table-wrap{overflow:auto;margin-top:14px}table{width:100%;min-width:520px;border-collapse:collapse}th,td{border:1px solid var(--line);padding:8px;text-align:center}th{color:var(--muted);background:rgba(255,255,255,.03);font-size:13px}.cell{width:100%;min-width:52px;padding:10px 8px}.same{background:var(--gold);color:#170f09}.opp{background:var(--red);color:#1b0d08}.none{background:#31251d}.locked{background:#2f4a2d;color:#fff;cursor:not-allowed}.result{margin-top:18px}.seq{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:#19120e;font-size:clamp(19px,3vw,30px);line-height:1.55;word-break:break-word}.step-list{line-height:1.65}dialog{width:min(700px,calc(100% - 32px));border:1px solid var(--line);border-radius:22px;background:var(--card);color:var(--text);padding:22px}dialog::backdrop{background:rgba(0,0,0,.64)}.dialog-head{display:flex;justify-content:space-between;gap:12px}.x{width:38px;height:38px;border-radius:50%;padding:0;font-size:24px}@media(max-width:980px){.hero,.top,.solve{flex-direction:column;align-items:stretch}.grid{grid-template-columns:1fr}.controls{justify-content:stretch}select,input,.primary{width:100%}}
+    :root{
+      --bg:#120d0a;--panel:#211812;--panel2:#2f231a;--line:#5a4433;
+      --text:#fff1dd;--muted:#cdb8a3;--gold:#ffd071;--red:#ed876a;
+      --green:#2f5b35;--blue:#8bb7ff;--danger:#ff705e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 15% -10%,rgba(255,208,113,.18),transparent 34rem),linear-gradient(135deg,#0e0a08,#1a120e 70%,#100b08);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    .wrap{width:min(1280px,calc(100% - 28px));margin:auto;padding:24px 0 44px}
+    .hero,.card{border:1px solid var(--line);border-radius:22px;background:rgba(33,24,18,.94);box-shadow:0 24px 70px rgba(0,0,0,.3)}
+    .hero{padding:24px 26px;margin-bottom:16px;display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
+    .kicker{margin:0 0 8px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    h1{font-size:clamp(30px,4vw,48px);line-height:1.02;margin:0 0 10px}
+    h2{font-size:21px;margin:0 0 8px}
+    h3{font-size:16px;margin:0 0 8px;color:var(--gold)}
+    p{margin-top:0}.muted{color:var(--muted);line-height:1.5}.small{font-size:13px}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px;margin:4px 6px 0 0}
+    .card{padding:20px;margin-bottom:16px}
+    .top{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:12px}
+    label{display:grid;gap:7px;color:var(--muted);font-size:14px}
+    select,input,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:var(--panel2);color:var(--text);font:inherit}
+    textarea{min-height:82px;resize:vertical}
+    button{border:0;border-radius:14px;padding:12px 15px;background:#3b2c21;color:var(--text);font:inherit;font-weight:800;cursor:pointer}
+    button:hover{filter:brightness(1.08)}.primary{background:var(--gold);color:#160f09}.secondary{background:#30241c}.ghost{background:transparent;border:1px solid var(--line)}
+    .main-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:16px}
+    .chart{min-height:330px;overflow:auto}.plate-label{fill:var(--muted);font-weight:900;font-size:13px}.slot{fill:#3a2b20;stroke:var(--line);stroke-width:1.5;cursor:pointer}.slot.edge{fill:#4a211b}.slot.target{fill:#5f472e}.slot.active{fill:var(--gold);stroke:#fff2c8;stroke-width:2.5}.slot-text{fill:var(--text);font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.legend span{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px}
+    .table-wrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:16px}
+    table{width:100%;min-width:620px;border-collapse:collapse}th,td{border:1px solid var(--line);padding:8px;text-align:center}th{color:var(--muted);background:rgba(255,255,255,.035);font-size:13px}.sticky-left{position:sticky;left:0;background:#241a14;z-index:2}
+    .cell{width:100%;min-width:62px;padding:10px 7px}.same{background:var(--gold);color:#170f09}.opp{background:var(--red);color:#1b0d08}.none{background:#33261d}.locked{background:var(--green);color:#fff;cursor:not-allowed}
+    .solve-row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}.result{display:none}.result.show{display:block}.seq{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:#17100c;font-size:clamp(18px,2.6vw,28px);line-height:1.65;word-break:break-word}.step-list{line-height:1.65}.step-list li{margin-bottom:7px}.danger{color:var(--danger);font-weight:900}.ok{color:#9de18f;font-weight:900}.changed{color:var(--blue)}
+    .sim-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}.box{border:1px solid var(--line);border-radius:16px;background:#17100c;padding:14px;margin-top:12px}
+    dialog{width:min(760px,calc(100% - 32px));border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--text);padding:22px}dialog::backdrop{background:rgba(0,0,0,.65)}.dialog-head{display:flex;justify-content:space-between;gap:12px}.x{width:38px;height:38px;border-radius:50%;padding:0;font-size:24px}
+    @media(max-width:980px){.hero,.top,.main-grid,.solve-row,.sim-grid{grid-template-columns:1fr;display:grid}.controls{grid-template-columns:1fr}.hero{display:grid}.primary{width:100%}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="hero">
-      <div>
-        <p class="kicker">Gothic Remake helper · v3</p>
-        <h1>Решатель замков с пластинами</h1>
-        <p class="muted">Введи стартовые положения и связи между пластинами. Приложение найдёт последовательность реальных нажатий, чтобы вывести все пластины в центральный четвёртый слот.</p>
-      </div>
-      <button class="help" id="helpBtn">Как пользоваться</button>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="kicker">Gothic Remake helper · v5</p>
+      <h1>Решатель замков с пластинами</h1>
+      <p class="muted">Вертикальный ввод закреплён: <b>столбец — пластина, которую двигаем вправо</b>, строка — какая пластина меняется. По умолчанию решатель избегает штрафных попаданий в крайние слоты 1 и 7.</p>
+      <span class="pill">цель: все пластины в слоте 4</span><span class="pill">края 1/7 = штрафный риск</span><span class="pill">ввод только вертикальный</span>
+    </div>
+    <button class="ghost" id="helpBtn">Как пользоваться</button>
+  </section>
+
+  <section class="card top">
+    <div>
+      <h2>1. Настрой замок</h2>
+      <p class="muted">Выставь стартовые положения и укажи, какая пластина выбрана первой. Если пластина уже стоит в 1 или 7, это допустимо; запрещён именно ход, который <b>загоняет</b> пластину в край.</p>
+    </div>
+    <div class="controls">
+      <label>Количество пластин<select id="count"><option>3</option><option>4</option><option>5</option><option selected>6</option></select></label>
+      <label>Старт выбора<select id="startPlate"></select></label>
+      <label>Куда ведёт ↑<select id="upMode"><option value="next" selected>к следующей пластине</option><option value="prev">к предыдущей пластине</option></select></label>
+      <label>Лимит нажатий<input id="limit" type="number" min="1" max="400" value="180"></label>
+      <label>Разрешённые штрафы<select id="damageLimit"><option value="0" selected>0 — безопасно</option><option value="1">1 штраф</option><option value="2">2 штрафа</option></select></label>
+      <label>Что считать штрафом<select id="damageMode"><option value="enterEdge" selected>вход в слот 1/7</option><option value="overflow">только выход за 1–7</option></select></label>
+      <button id="demo">Пример Kor Kalom</button>
+      <button class="secondary" id="reset">Сброс</button>
+    </div>
+  </section>
+
+  <section class="main-grid">
+    <section class="card">
+      <h2>2. Начальные положения</h2>
+      <p class="muted">Жёлтый слот — текущее положение. Красноватые слоты 1 и 7 — края, попадание в них новым ходом считается штрафом в безопасном режиме.</p>
+      <div id="chart" class="chart"></div>
+      <div class="legend"><span>слот 4 — цель</span><span>слоты 1/7 — край</span><span>жёлтый — текущее положение</span></div>
     </section>
 
-    <section class="card top">
-      <div>
-        <h2>1. Настрой замок</h2>
-        <p class="muted">Пластин может быть от 3 до 6. У каждой 7 слотов, цель — слот 4.</p>
-        <div class="notice">Важно: диагональ таблицы теперь зафиксирована. Выбранная пластина всегда двигается в сторону нажатия. Таблица описывает только побочный эффект на остальные пластины.</div>
-      </div>
-      <div class="controls">
-        <label>Количество пластин<select id="count"><option>3</option><option>4</option><option>5</option><option selected>6</option></select></label>
-        <label>Старт выбора<select id="startPlate"></select></label>
-        <label>Куда ведёт ↑<select id="upMode"><option value="next" selected>к следующей пластине</option><option value="prev">к предыдущей пластине</option></select></label>
-        <label>Лимит нажатий<input id="limit" type="number" min="1" max="300" value="120"></label>
-        <button id="demo">Пример</button><button class="secondary" id="reset">Сброс</button>
-      </div>
+    <section class="card">
+      <h2>3. Вертикальная таблица влияний</h2>
+      <p class="muted"><b>Колонка</b> — какую пластину двигаем вправо. <b>Строка</b> — какая пластина меняется. Заполняй именно колонку той пластины, которую проверяешь в игре.</p>
+      <div class="table-wrap"><table id="matrix"></table></div>
+      <p class="muted small" style="margin-top:12px">Пример: двигаешь П3 вправо, и П1 идёт вправо, а П5 влево. Значит в <b>колонке П3</b>: строка П1 = →, строка П5 = ←.</p>
     </section>
+  </section>
 
-    <section class="grid">
-      <section class="card">
-        <h2>2. Начальные положения</h2>
-        <p class="muted">Нажми на слот каждой пластины. Жёлтый слот — текущее положение.</p>
-        <div id="chart" class="chart"></div>
-      </section>
-      <section class="card">
-        <h2>3. Влияние на другие пластины</h2>
-        <p class="muted">Строка — какую пластину двигаем вправо. Столбец — какая другая пластина меняется. Диагональ заблокирована, потому что выбранная пластина движется сама.</p>
-        <div class="table-wrap"><table id="matrix"></table></div>
-      </section>
-    </section>
+  <section class="card solve-row">
+    <div>
+      <h2>4. Получить последовательность</h2>
+      <p class="muted">Решатель перебирает реальные нажатия стрелок вместе с выбранной пластиной. Ходы, которые создают штрафный край, отбрасываются, если разрешено 0 штрафов.</p>
+    </div>
+    <button class="primary" id="solve">Решить замок</button>
+  </section>
 
-    <section class="card solve">
-      <div>
-        <h2>4. Получить последовательность</h2>
-        <p class="muted">Решатель перебирает состояния вместе с выбранной пластиной, поэтому оптимизирует именно реальные нажатия стрелок: выбор вверх/вниз и движение влево/вправо.</p>
-      </div>
-      <button class="primary" id="solve">Решить замок</button>
-    </section>
+  <section class="card">
+    <h2>5. Проверить готовую последовательность</h2>
+    <p class="muted">Сюда можно вставить решение сообщества или вывод приложения. Проверка покажет, на каком шаге появляется штраф или выход за границы.</p>
+    <div class="sim-grid">
+      <label>Последовательность стрелок<textarea id="manualSeq" placeholder="Например: → ↑ ← ← ↑ ← ←"></textarea></label>
+      <button id="checkSeq">Проверить</button>
+    </div>
+    <div id="simResult" class="box" hidden></div>
+  </section>
 
-    <section class="card result" id="result" hidden>
-      <h2>Результат</h2>
-      <div id="summary" class="muted"></div>
-      <div id="sequence" class="seq"></div>
-      <ol id="steps" class="step-list"></ol>
-    </section>
-  </main>
+  <section class="card result" id="result">
+    <h2>Результат</h2>
+    <div id="summary" class="muted"></div>
+    <div id="sequence" class="seq"></div>
+    <ol id="steps" class="step-list"></ol>
+  </section>
+</main>
 
-  <dialog id="dialog">
-    <div class="dialog-head"><h2>Как пользоваться</h2><button class="x" id="closeDialog">×</button></div>
-    <ol>
-      <li>Выбери количество пластин и стартовую выбранную пластину.</li>
-      <li>Отметь стартовый слот каждой пластины.</li>
-      <li>Заполни таблицу только для влияния на другие пластины.</li>
-      <li>Диагональ не трогай: она означает движение выбранной пластины в сторону нажатия.</li>
-      <li>Нажми «Решить замок» и повтори последовательность стрелок в игре.</li>
-    </ol>
-    <p class="muted">Пример: если при движении пластины 1 вправо пластина 3 уходит влево, в строке «Пластина 1» и столбце «Пластина 3» поставь «←». Ячейку «Пластина 1 → Пластина 1» трогать не нужно.</p>
-  </dialog>
+<dialog id="dialog">
+  <div class="dialog-head"><h2>Как вводить данные</h2><button class="x" id="closeDialog">×</button></div>
+  <ol>
+    <li>В игре выбери пластину, например П3.</li>
+    <li>Нажми вправо и посмотри, какие пластины изменились.</li>
+    <li>Все эти изменения занеси в <b>колонку П3</b>.</li>
+    <li>Если пластина пошла вправо — ставь →. Если влево — ставь ←. Если не двигалась — оставь —.</li>
+    <li>Диагональ «П3 меняет П3» заблокирована, потому что выбранная пластина всегда движется сама.</li>
+  </ol>
+  <p class="muted">Вертикальный режим теперь единственный. Переключателя чтения таблицы больше нет.</p>
+</dialog>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script>
-    const MIN=1,MAX=7,CENTER=4;
-    let n=6,pos=[6,5,5,7,1,4],inf=[];
-    const $=id=>document.getElementById(id);
-    const els={count:$('count'),start:$('startPlate'),upMode:$('upMode'),limit:$('limit'),chart:$('chart'),matrix:$('matrix'),result:$('result'),summary:$('summary'),seq:$('sequence'),steps:$('steps')};
-    const defaults=c=>Array.from({length:c},(_,r)=>Array.from({length:c},(_,col)=>r===col?1:0));
-    function normalize(c){
-      n=Math.max(3,Math.min(6,c));
-      pos=Array.from({length:n},(_,i)=>pos[i]??CENTER);
-      const old=inf.length?inf:defaults(n);
-      inf=Array.from({length:n},(_,r)=>Array.from({length:n},(_,col)=>col===r?1:(Number.isInteger(old[r]?.[col])?old[r][col]:0)));
-      syncStartOptions();
-    }
-    function syncStartOptions(){
-      const old=Number(els.start.value)||1;
-      els.start.innerHTML='';
-      for(let i=1;i<=n;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`Пластина ${i}`;els.start.appendChild(o)}
-      els.start.value=String(Math.min(old,n));
-    }
-    function clear(){els.result.hidden=true;els.summary.textContent='';els.seq.textContent='';els.steps.innerHTML=''}
-    function render(){renderChart();renderMatrix()}
-    function renderChart(){
-      els.chart.innerHTML='';
-      if(!window.d3){els.chart.textContent='D3.js не загрузился. Проверь интернет и обнови страницу.';return}
-      const w=Math.max(330,n*82+24),h=310,sw=52,sh=28,gap=7,top=46;
-      const svg=d3.select(els.chart).append('svg').attr('viewBox',`0 0 ${w} ${h}`).attr('width',w).attr('height',h);
-      const groups=svg.selectAll('g.plate').data(pos).join('g').attr('transform',(_,i)=>`translate(${22+i*82},0)`);
-      groups.append('text').attr('class','plate-label').attr('x',sw/2).attr('y',20).attr('text-anchor','middle').text((_,i)=>`Пластина ${i+1}`);
-      groups.each(function(p,i){
-        const slots=Array.from({length:MAX},(_,k)=>k+1);
-        const sg=d3.select(this).selectAll('g.slotg').data(slots).join('g').attr('transform',s=>`translate(0,${top+(s-1)*(sh+gap)})`).on('click',(_,s)=>{pos[i]=s;clear();renderChart()});
-        sg.append('rect').attr('class',s=>['slot',s===CENTER?'target':'',s===p?'active':''].join(' ')).attr('rx',10).attr('width',sw).attr('height',sh);
-        sg.append('text').attr('class','slot-text').attr('x',sw/2).attr('y',sh/2+1).text(s=>s)
-      })
-    }
-    function label(v){return v===1?'→':v===-1?'←':'—'}
-    function cls(v,locked=false){return locked?'locked':(v===1?'same':v===-1?'opp':'none')}
-    function next(v){return v===0?1:v===1?-1:0}
-    function th(t){const e=document.createElement('th');e.textContent=t;return e}
-    function renderMatrix(){
-      els.matrix.innerHTML='';
-      const thead=document.createElement('thead'),hr=document.createElement('tr');
-      hr.appendChild(th('Двигаем вправо'));
-      for(let c=0;c<n;c++)hr.appendChild(th(`Пластина ${c+1}`));
-      thead.appendChild(hr);els.matrix.appendChild(thead);
-      const tb=document.createElement('tbody');
-      for(let r=0;r<n;r++){
-        const tr=document.createElement('tr');tr.appendChild(th(`Пластина ${r+1}`));
-        for(let c=0;c<n;c++){
-          const td=document.createElement('td'),b=document.createElement('button');
-          const locked=r===c;
-          if(locked)inf[r][c]=1;
-          b.type='button';b.className=`cell ${cls(inf[r][c],locked)}`;b.textContent=locked?'сам →':label(inf[r][c]);
-          b.title=locked?'Выбранная пластина всегда движется в сторону нажатия':'Клик: нет связи / вправо / влево';
-          b.disabled=locked;
-          if(!locked)b.onclick=()=>{inf[r][c]=next(inf[r][c]);clear();renderMatrix()};
-          td.appendChild(b);tr.appendChild(td)
-        }
-        tb.appendChild(tr)
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+  const MIN=1,MAX=7,CENTER=4;
+  let n=6;
+  let pos=[6,5,5,7,1,4];
+  let effects=[]; // effects[affected][mover], vertical input
+
+  const $=id=>document.getElementById(id);
+  const els={
+    count:$('count'),start:$('startPlate'),upMode:$('upMode'),limit:$('limit'),
+    damageLimit:$('damageLimit'),damageMode:$('damageMode'),chart:$('chart'),matrix:$('matrix'),
+    result:$('result'),summary:$('summary'),seq:$('sequence'),steps:$('steps'),
+    manualSeq:$('manualSeq'),simResult:$('simResult')
+  };
+
+  function defaults(c){return Array.from({length:c},(_,affected)=>Array.from({length:c},(_,mover)=>affected===mover?1:0));}
+  function normalize(c){
+    n=Math.max(3,Math.min(6,c));
+    pos=Array.from({length:n},(_,i)=>pos[i]??CENTER);
+    const old=effects.length?effects:defaults(n);
+    effects=Array.from({length:n},(_,a)=>Array.from({length:n},(_,m)=>a===m?1:(Number.isInteger(old[a]?.[m])?old[a][m]:0)));
+    syncStartOptions();
+  }
+  function syncStartOptions(){
+    const old=Number(els.start.value)||1;
+    els.start.innerHTML='';
+    for(let i=1;i<=n;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`Пластина ${i}`;els.start.appendChild(o)}
+    els.start.value=String(Math.min(old,n));
+  }
+  function clearResult(){els.result.classList.remove('show');els.summary.textContent='';els.seq.textContent='';els.steps.innerHTML='';els.simResult.hidden=true;els.simResult.textContent=''}
+  function render(){renderChart();renderMatrix()}
+
+  function renderChart(){
+    els.chart.innerHTML='';
+    if(!window.d3){els.chart.textContent='D3.js не загрузился. Проверь интернет и обнови страницу.';return}
+    const w=Math.max(330,n*82+24),h=318,sw=54,sh=28,gap=7,top=46;
+    const svg=d3.select(els.chart).append('svg').attr('viewBox',`0 0 ${w} ${h}`).attr('width',w).attr('height',h);
+    const groups=svg.selectAll('g.plate').data(pos).join('g').attr('transform',(_,i)=>`translate(${22+i*82},0)`);
+    groups.append('text').attr('class','plate-label').attr('x',sw/2).attr('y',20).attr('text-anchor','middle').text((_,i)=>`П${i+1}`);
+    groups.each(function(p,i){
+      const slots=Array.from({length:MAX},(_,k)=>k+1);
+      const sg=d3.select(this).selectAll('g.slotg').data(slots).join('g')
+        .attr('transform',s=>`translate(0,${top+(s-1)*(sh+gap)})`)
+        .on('click',(_,s)=>{pos[i]=s;clearResult();renderChart()});
+      sg.append('rect').attr('class',s=>['slot',s===MIN||s===MAX?'edge':'',s===CENTER?'target':'',s===p?'active':''].join(' ')).attr('rx',10).attr('width',sw).attr('height',sh);
+      sg.append('text').attr('class','slot-text').attr('x',sw/2).attr('y',sh/2+1).text(s=>s)
+    })
+  }
+
+  function label(v){return v===1?'→':v===-1?'←':'—'}
+  function cls(v,locked=false){return locked?'locked':(v===1?'same':v===-1?'opp':'none')}
+  function next(v){return v===0?1:v===1?-1:0}
+  function th(t,sticky=false){const e=document.createElement('th');e.textContent=t;if(sticky)e.className='sticky-left';return e}
+
+  function renderMatrix(){
+    els.matrix.innerHTML='';
+    const thead=document.createElement('thead'),hr=document.createElement('tr');
+    hr.appendChild(th('Меняется ↓ / двигаем →',true));
+    for(let m=0;m<n;m++)hr.appendChild(th(`Двигаем П${m+1}`));
+    thead.appendChild(hr);els.matrix.appendChild(thead);
+    const tb=document.createElement('tbody');
+    for(let a=0;a<n;a++){
+      const tr=document.createElement('tr');tr.appendChild(th(`Меняется П${a+1}`,true));
+      for(let m=0;m<n;m++){
+        const td=document.createElement('td'),b=document.createElement('button'),locked=a===m;
+        if(locked)effects[a][m]=1;
+        b.type='button';b.className=`cell ${cls(effects[a][m],locked)}`;b.textContent=locked?'сам →':label(effects[a][m]);
+        b.title=locked?'Выбранная пластина всегда движется в сторону нажатия':'Клик: нет связи / вправо / влево';
+        b.disabled=locked;
+        if(!locked)b.onclick=()=>{effects[a][m]=next(effects[a][m]);clearResult();renderMatrix()};
+        td.appendChild(b);tr.appendChild(td);
       }
-      els.matrix.appendChild(tb)
+      tb.appendChild(tr);
     }
-    const posKey=s=>s.join(',');
-    const stateKey=(s,sel)=>`${posKey(s)}|${sel}`;
-    function apply(s,plate,dir){
-      inf[plate][plate]=1;
-      const nxt=s.map((p,j)=>p+dir*inf[plate][j]);
-      return nxt.every(x=>x>=MIN&&x<=MAX)?nxt:null
+    els.matrix.appendChild(tb);
+  }
+
+  const posKey=s=>s.join(',');
+  const stateKey=(s,sel,dmg)=>`${posKey(s)}|${sel}|${dmg}`;
+
+  function selectedAfter(sel,sym){
+    const upNext=els.upMode.value==='next';
+    const delta=(sym==='↑')===(upNext)?1:-1;
+    const nxt=sel+delta;
+    return nxt>=0&&nxt<n?nxt:null;
+  }
+
+  function moveResult(s,mover,dir){
+    effects[mover][mover]=1;
+    const after=s.map((p,a)=>p+dir*effects[a][mover]);
+    const overflow=after.some(x=>x<MIN||x>MAX);
+    if(overflow)return {ok:false,after,damage:99,reason:'выход за 1–7'};
+    let edgeHits=[];
+    if(els.damageMode.value==='enterEdge'){
+      after.forEach((v,i)=>{
+        if(v!==s[i] && (v===MIN || v===MAX)) edgeHits.push(i);
+      });
     }
-    function selectedAfter(sel,sym){
-      const upNext=els.upMode.value==='next';
-      const delta=(sym==='↑')===(upNext)?1:-1;
-      const nxt=sel+delta;
-      return nxt>=0&&nxt<n?nxt:null
-    }
-    function solveModel(maxPresses){
-      const startSel=(Number(els.start.value)||1)-1;
-      const target=posKey(Array.from({length:n},()=>CENTER));
-      const start=stateKey(pos,startSel);
-      const q=[{s:pos.slice(),sel:startSel}],prev=new Map([[start,null]]),depth=new Map([[start,0]]);
-      let qi=0;
-      while(qi<q.length){
-        const cur=q[qi++],ck=stateKey(cur.s,cur.sel),d=depth.get(ck);
-        if(posKey(cur.s)===target)return buildPath(prev,ck,prev.size);
-        if(d>=maxPresses)continue;
-        for(const sym of ['↑','↓']){
-          const ns=selectedAfter(cur.sel,sym);
-          if(ns===null)continue;
-          const nk=stateKey(cur.s,ns);
-          if(!prev.has(nk)){prev.set(nk,{prev:ck,action:sym,type:'select',sel:ns,s:cur.s.slice()});depth.set(nk,d+1);q.push({s:cur.s.slice(),sel:ns})}
-        }
-        for(const [sym,dir] of [['→',1],['←',-1]]){
-          const nxt=apply(cur.s,cur.sel,dir);
-          if(!nxt)continue;
-          const nk=stateKey(nxt,cur.sel);
-          if(!prev.has(nk)){prev.set(nk,{prev:ck,action:sym,type:'move',plate:cur.sel,dir,s:nxt.slice()});depth.set(nk,d+1);q.push({s:nxt,sel:cur.sel})}
+    return {ok:true,after,damage:edgeHits.length?1:0,edgeHits,reason:edgeHits.length?'вход в край 1/7':'без штрафа'};
+  }
+
+  function solveModel(maxPresses){
+    const damageLimit=Number(els.damageLimit.value)||0;
+    const startSel=(Number(els.start.value)||1)-1;
+    const target=posKey(Array.from({length:n},()=>CENTER));
+    const q=[{s:pos.slice(),sel:startSel,dmg:0}];
+    const prev=new Map([[stateKey(pos,startSel,0),null]]);
+    const depth=new Map([[stateKey(pos,startSel,0),0]]);
+    let qi=0;
+    while(qi<q.length){
+      const cur=q[qi++],ck=stateKey(cur.s,cur.sel,cur.dmg),d=depth.get(ck);
+      if(posKey(cur.s)===target)return buildPath(prev,ck,prev.size);
+      if(d>=maxPresses)continue;
+
+      for(const sym of ['↑','↓']){
+        const ns=selectedAfter(cur.sel,sym);
+        if(ns===null)continue;
+        const nk=stateKey(cur.s,ns,cur.dmg);
+        if(!prev.has(nk)){
+          prev.set(nk,{prev:ck,action:sym,type:'select',sel:ns,s:cur.s.slice(),dmg:cur.dmg});
+          depth.set(nk,d+1);q.push({s:cur.s.slice(),sel:ns,dmg:cur.dmg});
         }
       }
-      return{ok:false,actions:[],seen:prev.size}
-    }
-    function buildPath(prev,last,seen){
-      const actions=[];let k=last;
-      while(prev.get(k)){actions.push(prev.get(k));k=prev.get(k).prev}
-      actions.reverse();
-      return{ok:true,actions,seen}
-    }
-    function showSolution(){
-      clear();
-      const maxPresses=parseInt(els.limit.value,10)||120,res=solveModel(maxPresses);
-      els.result.hidden=false;
-      if(!res.ok){
-        els.summary.innerHTML=`Решение не найдено до лимита <b>${maxPresses}</b> нажатий. Проверено состояний: <b>${res.seen}</b>. Проверь связи, стартовую выбранную пластину или увеличь лимит.`;
-        els.seq.textContent='—';
-        return
-      }
-      const moves=res.actions.filter(a=>a.type==='move').length;
-      els.summary.innerHTML=`Найдено решение: <b>${res.actions.length}</b> нажатий, из них <b>${moves}</b> движений пластин. Проверено состояний: <b>${res.seen}</b>.`;
-      els.seq.textContent=res.actions.length?res.actions.map(a=>a.action).join(' '):'Замок уже отцентрирован';
-      els.steps.innerHTML='';
-      let curState=pos.slice();
-      res.actions.forEach((a,i)=>{
-        const li=document.createElement('li');
-        if(a.type==='select'){
-          li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать пластину ${a.sel+1}; положение пластин не меняется`;
-        }else{
-          const before=curState.slice();
-          const after=a.s.slice();
-          const changes=after.map((v,j)=>{
-            if(v===before[j])return null;
-            const tag=j===a.plate?'выбранная пластина':`связь из строки «Пластина ${a.plate+1}»`;
-            return `П${j+1}: ${before[j]}→${v} (${tag})`;
-          }).filter(Boolean);
-          li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать пластину ${a.plate+1}; изменения: ${changes.join('; ')}; состояние: ${after.join(' · ')}`;
-          curState=after;
+
+      for(const [sym,dir] of [['→',1],['←',-1]]){
+        const r=moveResult(cur.s,cur.sel,dir);
+        if(!r.ok)continue;
+        const nd=cur.dmg+r.damage;
+        if(nd>damageLimit)continue;
+        const nk=stateKey(r.after,cur.sel,nd);
+        if(!prev.has(nk)){
+          prev.set(nk,{prev:ck,action:sym,type:'move',plate:cur.sel,dir,s:r.after.slice(),before:cur.s.slice(),damage:r.damage,edgeHits:r.edgeHits||[],dmg:nd});
+          depth.set(nk,d+1);q.push({s:r.after,sel:cur.sel,dmg:nd});
         }
-        els.steps.appendChild(li)
-      })
+      }
     }
-    function demo(){
-      n=6;pos=[6,5,5,7,1,4];
-      inf=[[1,0,0,1,0,0],[0,1,1,0,-1,0],[1,0,1,-1,0,0],[0,0,0,1,1,0],[0,0,1,0,1,0],[0,0,0,0,0,1]];
-      els.count.value='6';els.limit.value='120';els.upMode.value='next';normalize(6);els.start.value='1';clear();render()
+    return{ok:false,actions:[],seen:prev.size};
+  }
+
+  function buildPath(prev,last,seen){
+    const actions=[];let k=last;
+    while(prev.get(k)){actions.push(prev.get(k));k=prev.get(k).prev}
+    actions.reverse();
+    return{ok:true,actions,seen};
+  }
+
+  function changeText(before,after,mover,edgeHits=[]){
+    const edgeSet=new Set(edgeHits);
+    const changes=after.map((v,i)=>{
+      if(v===before[i])return null;
+      const why=i===mover?'сама выбранная пластина':`влияние из колонки П${mover+1}`;
+      const edge=edgeSet.has(i)?' <span class="danger">штрафный край</span>':'';
+      return `<span class="changed">П${i+1}: ${before[i]}→${v}</span> (${why})${edge}`;
+    }).filter(Boolean);
+    return changes.length?changes.join('; '):'изменений нет';
+  }
+
+  function showSolution(){
+    clearResult();
+    const maxPresses=parseInt(els.limit.value,10)||180;
+    const res=solveModel(maxPresses);
+    els.result.classList.add('show');
+    if(!res.ok){
+      els.summary.innerHTML=`Решение не найдено до лимита <b>${maxPresses}</b> нажатий при лимите штрафов <b>${els.damageLimit.value}</b>. Проверено состояний: <b>${res.seen}</b>.`;
+      els.seq.textContent='—';
+      return;
     }
-    function reset(){
-      const c=parseInt(els.count.value,10)||4;n=c;pos=Array.from({length:n},()=>CENTER);inf=defaults(n);normalize(n);clear();render()
+    const moves=res.actions.filter(a=>a.type==='move').length;
+    const dmg=res.actions.reduce((s,a)=>s+(a.damage||0),0);
+    els.summary.innerHTML=`Найдено решение: <b>${res.actions.length}</b> нажатий, из них <b>${moves}</b> движений пластин. Штрафов: <b>${dmg}</b>. Проверено состояний: <b>${res.seen}</b>.`;
+    els.seq.textContent=res.actions.length?res.actions.map(a=>a.action).join(' '):'Замок уже отцентрирован';
+    els.steps.innerHTML='';
+    res.actions.forEach((a,i)=>{
+      const li=document.createElement('li');
+      if(a.type==='select') li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать П${a.sel+1}; положение не меняется`;
+      else li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать П${a.plate+1}; ${changeText(a.before,a.s,a.plate,a.edgeHits)}; состояние: ${a.s.join(' · ')}`;
+      els.steps.appendChild(li);
+    });
+  }
+
+  function parseArrows(text){return [...text].filter(ch=>'↑↓←→'.includes(ch));}
+  function checkManualSequence(){
+    clearResult();
+    const actions=parseArrows(els.manualSeq.value);
+    let s=pos.slice(),sel=(Number(els.start.value)||1)-1,dmg=0;
+    const lines=[];
+    for(let i=0;i<actions.length;i++){
+      const a=actions[i];
+      if(a==='↑'||a==='↓'){
+        const ns=selectedAfter(sel,a);
+        if(ns===null){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">нельзя выбрать пластину за границей списка</span></div>`);break}
+        sel=ns;lines.push(`<div>${i+1}. <b>${a}</b> — выбрана П${sel+1}</div>`);continue;
+      }
+      const dir=a==='→'?1:-1;
+      const r=moveResult(s,sel,dir);
+      if(!r.ok){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">${r.reason}</span>; попытка состояния: ${r.after.join(' · ')}</div>`);break}
+      dmg+=r.damage;
+      lines.push(`<div>${i+1}. <b>${a}</b> — П${sel+1}; ${changeText(s,r.after,sel,r.edgeHits)}; состояние: ${r.after.join(' · ')}${r.damage?` · <span class="danger">штрафов всего: ${dmg}</span>`:''}</div>`);
+      s=r.after;
     }
-    els.count.onchange=()=>{normalize(parseInt(els.count.value,10)||4);clear();render()};
-    els.start.onchange=clear;els.upMode.onchange=clear;
-    $('solve').onclick=showSolution;$('demo').onclick=demo;$('reset').onclick=reset;
-    $('helpBtn').onclick=()=>$('dialog').showModal();$('closeDialog').onclick=()=>$('dialog').close();
-    normalize(n);render();
-  </script>
+    const ok=posKey(s)===posKey(Array.from({length:n},()=>CENTER));
+    els.simResult.hidden=false;
+    els.simResult.innerHTML=`<div>${ok?'<span class="ok">Финал достигнут</span>':'Финал не достигнут'} · штрафов: <b>${dmg}</b> · итог: ${s.join(' · ')}</div><hr style="border-color:var(--line)">${lines.join('')}`;
+  }
+
+  function demo(){
+    n=6;pos=[6,5,5,7,1,4];
+    // vertical input: effects[affected][mover]
+    effects=[
+      [1,0,1,0,0,0],
+      [0,1,0,0,0,0],
+      [0,1,1,0,1,0],
+      [1,0,-1,1,0,0],
+      [0,-1,0,1,1,0],
+      [0,0,0,0,0,1]
+    ];
+    els.count.value='6';els.limit.value='180';els.damageLimit.value='0';els.damageMode.value='enterEdge';els.upMode.value='next';
+    normalize(6);els.start.value='1';clearResult();render();
+  }
+  function reset(){
+    const c=parseInt(els.count.value,10)||6;n=c;pos=Array.from({length:n},()=>CENTER);effects=defaults(n);normalize(n);clearResult();render();
+  }
+
+  els.count.onchange=()=>{normalize(parseInt(els.count.value,10)||6);clearResult();render()};
+  els.start.onchange=clearResult;els.upMode.onchange=clearResult;els.damageLimit.onchange=clearResult;els.damageMode.onchange=clearResult;
+  $('solve').onclick=showSolution;$('checkSeq').onclick=checkManualSequence;$('demo').onclick=demo;$('reset').onclick=reset;
+  $('helpBtn').onclick=()=>$('dialog').showModal();$('closeDialog').onclick=()=>$('dialog').close();
+  normalize(n);render();
+</script>
 </body>
 </html>
