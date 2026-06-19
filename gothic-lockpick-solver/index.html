@@ -12,7 +12,7 @@
   <main class="wrap">
     <section class="hero">
       <div>
-        <p class="kicker">Gothic Remake helper · v2</p>
+        <p class="kicker">Gothic Remake helper · v3</p>
         <h1>Решатель замков с пластинами</h1>
         <p class="muted">Введи стартовые положения и связи между пластинами. Приложение найдёт последовательность реальных нажатий, чтобы вывести все пластины в центральный четвёртый слот.</p>
       </div>
@@ -195,10 +195,22 @@
       els.summary.innerHTML=`Найдено решение: <b>${res.actions.length}</b> нажатий, из них <b>${moves}</b> движений пластин. Проверено состояний: <b>${res.seen}</b>.`;
       els.seq.textContent=res.actions.length?res.actions.map(a=>a.action).join(' '):'Замок уже отцентрирован';
       els.steps.innerHTML='';
+      let curState=pos.slice();
       res.actions.forEach((a,i)=>{
         const li=document.createElement('li');
-        if(a.type==='select')li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать пластину ${a.sel+1}`;
-        else li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать пластину ${a.plate+1}; состояние: ${a.s.join(' · ')}`;
+        if(a.type==='select'){
+          li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать пластину ${a.sel+1}; положение пластин не меняется`;
+        }else{
+          const before=curState.slice();
+          const after=a.s.slice();
+          const changes=after.map((v,j)=>{
+            if(v===before[j])return null;
+            const tag=j===a.plate?'выбранная пластина':`связь из строки «Пластина ${a.plate+1}»`;
+            return `П${j+1}: ${before[j]}→${v} (${tag})`;
+          }).filter(Boolean);
+          li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать пластину ${a.plate+1}; изменения: ${changes.join('; ')}; состояние: ${after.join(' · ')}`;
+          curState=after;
+        }
         els.steps.appendChild(li)
       })
     }
