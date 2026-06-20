@@ -3,355 +3,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gothic Remake Plate Puzzle Solver</title>
+  <title>Gothic Remake Plate Puzzle Solver & Mini-game</title>
   <style>
-    :root{
-      --bg:#120d0a;--panel:#211812;--panel2:#2f231a;--line:#5a4433;
-      --text:#fff1dd;--muted:#cdb8a3;--gold:#ffd071;--red:#ed876a;
-      --green:#2f5b35;--blue:#8bb7ff;--danger:#ff705e;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(circle at 15% -10%,rgba(255,208,113,.18),transparent 34rem),linear-gradient(135deg,#0e0a08,#1a120e 70%,#100b08);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-    .wrap{width:min(1280px,calc(100% - 28px));margin:auto;padding:24px 0 44px}
-    .hero,.card{border:1px solid var(--line);border-radius:22px;background:rgba(33,24,18,.94);box-shadow:0 24px 70px rgba(0,0,0,.3)}
-    .hero{padding:24px 26px;margin-bottom:16px;display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
-    .kicker{margin:0 0 8px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-    h1{font-size:clamp(30px,4vw,48px);line-height:1.02;margin:0 0 10px}
-    h2{font-size:21px;margin:0 0 8px}
-    h3{font-size:16px;margin:0 0 8px;color:var(--gold)}
-    p{margin-top:0}.muted{color:var(--muted);line-height:1.5}.small{font-size:13px}
-    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px;margin:4px 6px 0 0}
-    .card{padding:20px;margin-bottom:16px}
-    .top{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
-    .controls{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:12px}
-    label{display:grid;gap:7px;color:var(--muted);font-size:14px}
-    select,input,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:var(--panel2);color:var(--text);font:inherit}
-    textarea{min-height:82px;resize:vertical}
-    button{border:0;border-radius:14px;padding:12px 15px;background:#3b2c21;color:var(--text);font:inherit;font-weight:800;cursor:pointer}
-    button:hover{filter:brightness(1.08)}.primary{background:var(--gold);color:#160f09}.secondary{background:#30241c}.ghost{background:transparent;border:1px solid var(--line)}
-    .main-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:16px}
-    .chart{min-height:330px;overflow:auto}.plate-label{fill:var(--muted);font-weight:900;font-size:13px}.slot{fill:#3a2b20;stroke:var(--line);stroke-width:1.5;cursor:pointer}.slot.edge{fill:#4a211b}.slot.target{fill:#5f472e}.slot.active{fill:var(--gold);stroke:#fff2c8;stroke-width:2.5}.slot-text{fill:var(--text);font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
-    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.legend span{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px}
-    .table-wrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:16px}
-    table{width:100%;min-width:620px;border-collapse:collapse}th,td{border:1px solid var(--line);padding:8px;text-align:center}th{color:var(--muted);background:rgba(255,255,255,.035);font-size:13px}.sticky-left{position:sticky;left:0;background:#241a14;z-index:2}
-    .cell{width:100%;min-width:62px;padding:10px 7px}.same{background:var(--gold);color:#170f09}.opp{background:var(--red);color:#1b0d08}.none{background:#33261d}.locked{background:var(--green);color:#fff;cursor:not-allowed}
-    .solve-row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}.result{display:none}.result.show{display:block}.seq{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:#17100c;font-size:clamp(18px,2.6vw,28px);line-height:1.65;word-break:break-word}.step-list{line-height:1.65}.step-list li{margin-bottom:7px}.danger{color:var(--danger);font-weight:900}.ok{color:#9de18f;font-weight:900}.changed{color:var(--blue)}
-    .sim-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}.box{border:1px solid var(--line);border-radius:16px;background:#17100c;padding:14px;margin-top:12px}
-    dialog{width:min(760px,calc(100% - 32px));border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--text);padding:22px}dialog::backdrop{background:rgba(0,0,0,.65)}.dialog-head{display:flex;justify-content:space-between;gap:12px}.x{width:38px;height:38px;border-radius:50%;padding:0;font-size:24px}
-    @media(max-width:980px){.hero,.top,.main-grid,.solve-row,.sim-grid{grid-template-columns:1fr;display:grid}.controls{grid-template-columns:1fr}.hero{display:grid}.primary{width:100%}}
+    :root{--bg:#120d0a;--panel:#211812;--panel2:#2f231a;--panel3:#17100c;--line:#5a4433;--text:#fff1dd;--muted:#cdb8a3;--gold:#ffd071;--red:#ed876a;--green:#2f5b35;--blue:#8bb7ff;--danger:#ff705e;--ok:#9de18f}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 14% -8%,rgba(255,208,113,.18),transparent 35rem),linear-gradient(135deg,#0e0a08,#1a120e 70%,#100b08);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{width:min(1320px,calc(100% - 28px));margin:auto;padding:24px 0 44px}.hero,.card{border:1px solid var(--line);border-radius:22px;background:rgba(33,24,18,.94);box-shadow:0 24px 70px rgba(0,0,0,.3)}.hero{padding:24px 26px;margin-bottom:16px;display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}.kicker{margin:0 0 8px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(30px,4vw,48px);line-height:1.02;margin:0 0 10px}h2{font-size:21px;margin:0 0 8px}h3{font-size:16px;margin:0 0 8px;color:var(--gold)}p{margin-top:0}.muted{color:var(--muted);line-height:1.5}.small{font-size:13px}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px;margin:4px 6px 0 0}.card{padding:20px;margin-bottom:16px}.controls{display:grid;grid-template-columns:repeat(2,minmax(170px,1fr));gap:12px}label{display:grid;gap:7px;color:var(--muted);font-size:14px}select,input,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:var(--panel2);color:var(--text);font:inherit}textarea{min-height:84px;resize:vertical}button{border:0;border-radius:14px;padding:12px 15px;background:#3b2c21;color:var(--text);font:inherit;font-weight:800;cursor:pointer}button:hover{filter:brightness(1.08)}button:disabled{opacity:.55;cursor:not-allowed}.primary{background:var(--gold);color:#160f09}.secondary{background:#30241c}.ghost{background:transparent;border:1px solid var(--line)}.danger-btn{background:#5c2d25}.layout{display:grid;grid-template-columns:.82fr 1.18fr;gap:16px}.game-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px}.board{display:flex;gap:14px;align-items:flex-start;overflow:auto;padding:4px 0 8px}.plate{display:grid;gap:7px;min-width:68px;justify-items:center}.plate-name{font-weight:900;color:var(--muted);font-size:14px}.plate.selected .plate-name{color:var(--gold)}.slot{width:56px;height:30px;border:1px solid var(--line);border-radius:10px;background:#3a2b20;color:var(--text);display:grid;place-items:center;font-size:13px;cursor:pointer}.slot.edge{background:#57261f}.slot.target{background:#5f472e}.slot.active{background:var(--gold);color:#1b1008;border-color:#fff2c8;box-shadow:0 0 0 2px rgba(255,242,200,.35)}.plate.selected .slot.active{box-shadow:0 0 0 3px rgba(255,208,113,.45),0 0 18px rgba(255,208,113,.35)}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.legend span{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#19120e;color:var(--muted);font-size:13px}.table-wrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:16px}table{width:100%;min-width:620px;border-collapse:collapse}th,td{border:1px solid var(--line);padding:8px;text-align:center}th{color:var(--muted);background:rgba(255,255,255,.035);font-size:13px}.sticky-left{position:sticky;left:0;background:#241a14;z-index:2}.cell{width:100%;min-width:62px;padding:10px 7px}.same{background:var(--gold);color:#170f09}.opp{background:var(--red);color:#1b0d08}.none{background:#33261d}.locked{background:var(--green);color:#fff;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.box{border:1px solid var(--line);border-radius:16px;background:var(--panel3);padding:14px;margin-top:12px}.seq{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:#17100c;font-size:clamp(18px,2.4vw,27px);line-height:1.65;word-break:break-word}.step-list{line-height:1.65}.step-list li{margin-bottom:7px}.danger{color:var(--danger);font-weight:900}.ok{color:var(--ok);font-weight:900}.changed{color:var(--blue)}.kbd{display:inline-grid;place-items:center;border:1px solid var(--line);background:#30241c;border-radius:8px;min-width:32px;height:28px;padding:0 8px;font-weight:900}.status{font-weight:900}.status.ok{color:var(--ok)}.status.bad{color:var(--danger)}dialog{width:min(760px,calc(100% - 32px));border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--text);padding:22px}dialog::backdrop{background:rgba(0,0,0,.65)}.dialog-head{display:flex;justify-content:space-between;gap:12px}.x{width:38px;height:38px;border-radius:50%;padding:0;font-size:24px}@media(max-width:1050px){.hero,.layout,.game-layout{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.primary{width:100%}}
   </style>
 </head>
 <body>
 <main class="wrap">
   <section class="hero">
     <div>
-      <p class="kicker">Gothic Remake helper · v5</p>
-      <h1>Решатель замков с пластинами</h1>
-      <p class="muted">Вертикальный ввод закреплён: <b>столбец — пластина, которую двигаем вправо</b>, строка — какая пластина меняется. По умолчанию решатель избегает штрафных попаданий в крайние слоты 1 и 7.</p>
-      <span class="pill">цель: все пластины в слоте 4</span><span class="pill">края 1/7 = штрафный риск</span><span class="pill">ввод только вертикальный</span>
-    </div>
-    <button class="ghost" id="helpBtn">Как пользоваться</button>
-  </section>
-
-  <section class="card top">
-    <div>
-      <h2>1. Настрой замок</h2>
-      <p class="muted">Выставь стартовые положения и укажи, какая пластина выбрана первой. Если пластина уже стоит в 1 или 7, это допустимо; запрещён именно ход, который <b>загоняет</b> пластину в край.</p>
+      <p class="kicker">Gothic Remake helper · v8</p>
+      <h1>Решатель и мини-игра по взлому</h1>
+      <p class="muted">Вертикальный ввод закреплён: <b>колонка — какую пластину двигаем вправо</b>, строка — какая пластина меняется. В решателе выбранная пластина должна двигаться к слоту 4, а связанные пластины могут смещаться как угодно, если не выходят за 1–7.</p>
+      <span class="pill">цель: все пластины в слоте 4</span><span class="pill">ввод только вертикальный</span><span class="pill">есть режим мини-игры</span>
     </div>
     <div class="controls">
       <label>Количество пластин<select id="count"><option>3</option><option>4</option><option>5</option><option selected>6</option></select></label>
       <label>Старт выбора<select id="startPlate"></select></label>
       <label>Куда ведёт ↑<select id="upMode"><option value="next" selected>к следующей пластине</option><option value="prev">к предыдущей пластине</option></select></label>
-      <label>Лимит нажатий<input id="limit" type="number" min="1" max="400" value="180"></label>
-      <label>Разрешённые штрафы<select id="damageLimit"><option value="0" selected>0 — безопасно</option><option value="1">1 штраф</option><option value="2">2 штрафа</option></select></label>
-      <label>Что считать штрафом<select id="damageMode"><option value="enterEdge" selected>вход в слот 1/7</option><option value="overflow">только выход за 1–7</option></select></label>
-      <button id="demo">Пример Kor Kalom</button>
-      <button class="secondary" id="reset">Сброс</button>
+      <label>Лимит нажатий<input id="limit" type="number" min="1" max="500" value="220"></label>
+      <label>Сложность генерации<select id="difficulty"><option value="easy">легко</option><option value="medium" selected>средне</option><option value="hard">сложно</option></select></label>
+      <label>Длина генерации<input id="scrambleSteps" type="number" min="4" max="40" value="16"></label>
+      <button class="primary" id="generate">Сгенерировать замок</button>
+      <button class="ghost" id="helpBtn">Как пользоваться</button>
     </div>
   </section>
-
-  <section class="main-grid">
+  <section class="layout">
     <section class="card">
-      <h2>2. Начальные положения</h2>
-      <p class="muted">Жёлтый слот — текущее положение. Красноватые слоты 1 и 7 — края, попадание в них новым ходом считается штрафом в безопасном режиме.</p>
-      <div id="chart" class="chart"></div>
-      <div class="legend"><span>слот 4 — цель</span><span>слоты 1/7 — край</span><span>жёлтый — текущее положение</span></div>
+      <h2>1. Начальные положения</h2>
+      <p class="muted">Жёлтый слот — текущее положение. Слот 4 — цель. Клик по слоту меняет стартовую позицию для решателя и мини-игры.</p>
+      <div id="startBoard" class="board"></div>
+      <div class="legend"><span>слот 4 — цель</span><span>слоты 1/7 — края</span><span>жёлтый — текущее положение</span></div>
+      <div class="actions"><button id="demo">Пример Kor Kalom</button><button class="secondary" id="reset">Сброс</button></div>
     </section>
-
     <section class="card">
-      <h2>3. Вертикальная таблица влияний</h2>
+      <h2>2. Вертикальная таблица влияний</h2>
       <p class="muted"><b>Колонка</b> — какую пластину двигаем вправо. <b>Строка</b> — какая пластина меняется. Заполняй именно колонку той пластины, которую проверяешь в игре.</p>
       <div class="table-wrap"><table id="matrix"></table></div>
       <p class="muted small" style="margin-top:12px">Пример: двигаешь П3 вправо, и П1 идёт вправо, а П5 влево. Значит в <b>колонке П3</b>: строка П1 = →, строка П5 = ←.</p>
     </section>
   </section>
-
-  <section class="card solve-row">
-    <div>
-      <h2>4. Получить последовательность</h2>
-      <p class="muted">Решатель перебирает реальные нажатия стрелок вместе с выбранной пластиной. Ходы, которые создают штрафный край, отбрасываются, если разрешено 0 штрафов.</p>
-    </div>
-    <button class="primary" id="solve">Решить замок</button>
+  <section class="game-layout">
+    <section class="card">
+      <h2>3. Мини-игра</h2>
+      <p class="muted">Нажми «Сгенерировать замок» или используй текущую таблицу. Управление: <span class="kbd">↑</span> <span class="kbd">↓</span> выбрать пластину, <span class="kbd">←</span> <span class="kbd">→</span> двигать выбранную пластину.</p>
+      <div id="gameBoard" class="board"></div>
+      <div class="box"><div>Статус: <span id="gameStatus" class="status">ожидание</span></div><div class="small muted" id="gameHint">Сгенерируй замок или нажми «Начать игру с текущего замка».</div></div>
+      <div class="actions"><button class="primary" id="startGame">Начать игру с текущего замка</button><button id="resetGame">Сбросить игру</button><button class="danger-btn" id="clearPlayerSeq">Очистить ход</button></div>
+    </section>
+    <section class="card">
+      <h2>4. Запись твоего хода</h2>
+      <p class="muted">Каждая стрелка записывается сюда. После победы можно сравнить свой ход с решением решателя.</p>
+      <div id="playerSeq" class="seq">—</div>
+      <div class="actions"><button id="copyPlayerSeq">Скопировать мой ход</button><button id="solve">Показать решение решателя</button></div>
+      <div id="solverBox" class="box" hidden><h3>Решение решателя</h3><div id="summary" class="muted"></div><div id="solutionSeq" class="seq"></div><ol id="steps" class="step-list"></ol></div>
+    </section>
   </section>
-
   <section class="card">
     <h2>5. Проверить готовую последовательность</h2>
-    <p class="muted">Сюда можно вставить решение сообщества или вывод приложения. Проверка покажет, на каком шаге появляется штраф или выход за границы.</p>
-    <div class="sim-grid">
-      <label>Последовательность стрелок<textarea id="manualSeq" placeholder="Например: → ↑ ← ← ↑ ← ←"></textarea></label>
-      <button id="checkSeq">Проверить</button>
-    </div>
+    <p class="muted">Можно вставить решение сообщества или свой ход. Проверка покажет, где ход невозможен или когда замок собран.</p>
+    <label>Последовательность стрелок<textarea id="manualSeq" placeholder="Например: ← ↑ ← ↑ ↑ →"></textarea></label>
+    <div class="actions"><button id="checkSeq">Проверить последовательность</button></div>
     <div id="simResult" class="box" hidden></div>
   </section>
-
-  <section class="card result" id="result">
-    <h2>Результат</h2>
-    <div id="summary" class="muted"></div>
-    <div id="sequence" class="seq"></div>
-    <ol id="steps" class="step-list"></ol>
-  </section>
 </main>
-
 <dialog id="dialog">
-  <div class="dialog-head"><h2>Как вводить данные</h2><button class="x" id="closeDialog">×</button></div>
-  <ol>
-    <li>В игре выбери пластину, например П3.</li>
-    <li>Нажми вправо и посмотри, какие пластины изменились.</li>
-    <li>Все эти изменения занеси в <b>колонку П3</b>.</li>
-    <li>Если пластина пошла вправо — ставь →. Если влево — ставь ←. Если не двигалась — оставь —.</li>
-    <li>Диагональ «П3 меняет П3» заблокирована, потому что выбранная пластина всегда движется сама.</li>
-  </ol>
-  <p class="muted">Вертикальный режим теперь единственный. Переключателя чтения таблицы больше нет.</p>
+  <div class="dialog-head"><h2>Как вводить данные и играть</h2><button class="x" id="closeDialog">×</button></div>
+  <ol><li>В игре выбери пластину, например П3, нажми вправо и посмотри, что изменилось.</li><li>Все изменения занеси в <b>колонку П3</b>: если пластина пошла вправо — →, если влево — ←.</li><li>Диагональ заблокирована, потому что выбранная пластина всегда движется сама.</li><li>В мини-игре можно управлять стрелками с клавиатуры. Ход записывается автоматически.</li><li>Кнопка «Сгенерировать замок» создаёт решаемый замок по выбранному количеству пластин и сложности.</li></ol>
 </dialog>
-
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-  const MIN=1,MAX=7,CENTER=4;
-  let n=6;
-  let pos=[6,5,5,7,1,4];
-  let effects=[]; // effects[affected][mover], vertical input
-
-  const $=id=>document.getElementById(id);
-  const els={
-    count:$('count'),start:$('startPlate'),upMode:$('upMode'),limit:$('limit'),
-    damageLimit:$('damageLimit'),damageMode:$('damageMode'),chart:$('chart'),matrix:$('matrix'),
-    result:$('result'),summary:$('summary'),seq:$('sequence'),steps:$('steps'),
-    manualSeq:$('manualSeq'),simResult:$('simResult')
-  };
-
-  function defaults(c){return Array.from({length:c},(_,affected)=>Array.from({length:c},(_,mover)=>affected===mover?1:0));}
-  function normalize(c){
-    n=Math.max(3,Math.min(6,c));
-    pos=Array.from({length:n},(_,i)=>pos[i]??CENTER);
-    const old=effects.length?effects:defaults(n);
-    effects=Array.from({length:n},(_,a)=>Array.from({length:n},(_,m)=>a===m?1:(Number.isInteger(old[a]?.[m])?old[a][m]:0)));
-    syncStartOptions();
-  }
-  function syncStartOptions(){
-    const old=Number(els.start.value)||1;
-    els.start.innerHTML='';
-    for(let i=1;i<=n;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`Пластина ${i}`;els.start.appendChild(o)}
-    els.start.value=String(Math.min(old,n));
-  }
-  function clearResult(){els.result.classList.remove('show');els.summary.textContent='';els.seq.textContent='';els.steps.innerHTML='';els.simResult.hidden=true;els.simResult.textContent=''}
-  function render(){renderChart();renderMatrix()}
-
-  function renderChart(){
-    els.chart.innerHTML='';
-    if(!window.d3){els.chart.textContent='D3.js не загрузился. Проверь интернет и обнови страницу.';return}
-    const w=Math.max(330,n*82+24),h=318,sw=54,sh=28,gap=7,top=46;
-    const svg=d3.select(els.chart).append('svg').attr('viewBox',`0 0 ${w} ${h}`).attr('width',w).attr('height',h);
-    const groups=svg.selectAll('g.plate').data(pos).join('g').attr('transform',(_,i)=>`translate(${22+i*82},0)`);
-    groups.append('text').attr('class','plate-label').attr('x',sw/2).attr('y',20).attr('text-anchor','middle').text((_,i)=>`П${i+1}`);
-    groups.each(function(p,i){
-      const slots=Array.from({length:MAX},(_,k)=>k+1);
-      const sg=d3.select(this).selectAll('g.slotg').data(slots).join('g')
-        .attr('transform',s=>`translate(0,${top+(s-1)*(sh+gap)})`)
-        .on('click',(_,s)=>{pos[i]=s;clearResult();renderChart()});
-      sg.append('rect').attr('class',s=>['slot',s===MIN||s===MAX?'edge':'',s===CENTER?'target':'',s===p?'active':''].join(' ')).attr('rx',10).attr('width',sw).attr('height',sh);
-      sg.append('text').attr('class','slot-text').attr('x',sw/2).attr('y',sh/2+1).text(s=>s)
-    })
-  }
-
-  function label(v){return v===1?'→':v===-1?'←':'—'}
-  function cls(v,locked=false){return locked?'locked':(v===1?'same':v===-1?'opp':'none')}
-  function next(v){return v===0?1:v===1?-1:0}
-  function th(t,sticky=false){const e=document.createElement('th');e.textContent=t;if(sticky)e.className='sticky-left';return e}
-
-  function renderMatrix(){
-    els.matrix.innerHTML='';
-    const thead=document.createElement('thead'),hr=document.createElement('tr');
-    hr.appendChild(th('Меняется ↓ / двигаем →',true));
-    for(let m=0;m<n;m++)hr.appendChild(th(`Двигаем П${m+1}`));
-    thead.appendChild(hr);els.matrix.appendChild(thead);
-    const tb=document.createElement('tbody');
-    for(let a=0;a<n;a++){
-      const tr=document.createElement('tr');tr.appendChild(th(`Меняется П${a+1}`,true));
-      for(let m=0;m<n;m++){
-        const td=document.createElement('td'),b=document.createElement('button'),locked=a===m;
-        if(locked)effects[a][m]=1;
-        b.type='button';b.className=`cell ${cls(effects[a][m],locked)}`;b.textContent=locked?'сам →':label(effects[a][m]);
-        b.title=locked?'Выбранная пластина всегда движется в сторону нажатия':'Клик: нет связи / вправо / влево';
-        b.disabled=locked;
-        if(!locked)b.onclick=()=>{effects[a][m]=next(effects[a][m]);clearResult();renderMatrix()};
-        td.appendChild(b);tr.appendChild(td);
-      }
-      tb.appendChild(tr);
-    }
-    els.matrix.appendChild(tb);
-  }
-
-  const posKey=s=>s.join(',');
-  const stateKey=(s,sel,dmg)=>`${posKey(s)}|${sel}|${dmg}`;
-
-  function selectedAfter(sel,sym){
-    const upNext=els.upMode.value==='next';
-    const delta=(sym==='↑')===(upNext)?1:-1;
-    const nxt=sel+delta;
-    return nxt>=0&&nxt<n?nxt:null;
-  }
-
-  function moveResult(s,mover,dir){
-    effects[mover][mover]=1;
-    const after=s.map((p,a)=>p+dir*effects[a][mover]);
-    const overflow=after.some(x=>x<MIN||x>MAX);
-    if(overflow)return {ok:false,after,damage:99,reason:'выход за 1–7'};
-    let edgeHits=[];
-    if(els.damageMode.value==='enterEdge'){
-      after.forEach((v,i)=>{
-        if(v!==s[i] && (v===MIN || v===MAX)) edgeHits.push(i);
-      });
-    }
-    return {ok:true,after,damage:edgeHits.length?1:0,edgeHits,reason:edgeHits.length?'вход в край 1/7':'без штрафа'};
-  }
-
-  function solveModel(maxPresses){
-    const damageLimit=Number(els.damageLimit.value)||0;
-    const startSel=(Number(els.start.value)||1)-1;
-    const target=posKey(Array.from({length:n},()=>CENTER));
-    const q=[{s:pos.slice(),sel:startSel,dmg:0}];
-    const prev=new Map([[stateKey(pos,startSel,0),null]]);
-    const depth=new Map([[stateKey(pos,startSel,0),0]]);
-    let qi=0;
-    while(qi<q.length){
-      const cur=q[qi++],ck=stateKey(cur.s,cur.sel,cur.dmg),d=depth.get(ck);
-      if(posKey(cur.s)===target)return buildPath(prev,ck,prev.size);
-      if(d>=maxPresses)continue;
-
-      for(const sym of ['↑','↓']){
-        const ns=selectedAfter(cur.sel,sym);
-        if(ns===null)continue;
-        const nk=stateKey(cur.s,ns,cur.dmg);
-        if(!prev.has(nk)){
-          prev.set(nk,{prev:ck,action:sym,type:'select',sel:ns,s:cur.s.slice(),dmg:cur.dmg});
-          depth.set(nk,d+1);q.push({s:cur.s.slice(),sel:ns,dmg:cur.dmg});
-        }
-      }
-
-      for(const [sym,dir] of [['→',1],['←',-1]]){
-        const r=moveResult(cur.s,cur.sel,dir);
-        if(!r.ok)continue;
-        const nd=cur.dmg+r.damage;
-        if(nd>damageLimit)continue;
-        const nk=stateKey(r.after,cur.sel,nd);
-        if(!prev.has(nk)){
-          prev.set(nk,{prev:ck,action:sym,type:'move',plate:cur.sel,dir,s:r.after.slice(),before:cur.s.slice(),damage:r.damage,edgeHits:r.edgeHits||[],dmg:nd});
-          depth.set(nk,d+1);q.push({s:r.after,sel:cur.sel,dmg:nd});
-        }
-      }
-    }
-    return{ok:false,actions:[],seen:prev.size};
-  }
-
-  function buildPath(prev,last,seen){
-    const actions=[];let k=last;
-    while(prev.get(k)){actions.push(prev.get(k));k=prev.get(k).prev}
-    actions.reverse();
-    return{ok:true,actions,seen};
-  }
-
-  function changeText(before,after,mover,edgeHits=[]){
-    const edgeSet=new Set(edgeHits);
-    const changes=after.map((v,i)=>{
-      if(v===before[i])return null;
-      const why=i===mover?'сама выбранная пластина':`влияние из колонки П${mover+1}`;
-      const edge=edgeSet.has(i)?' <span class="danger">штрафный край</span>':'';
-      return `<span class="changed">П${i+1}: ${before[i]}→${v}</span> (${why})${edge}`;
-    }).filter(Boolean);
-    return changes.length?changes.join('; '):'изменений нет';
-  }
-
-  function showSolution(){
-    clearResult();
-    const maxPresses=parseInt(els.limit.value,10)||180;
-    const res=solveModel(maxPresses);
-    els.result.classList.add('show');
-    if(!res.ok){
-      els.summary.innerHTML=`Решение не найдено до лимита <b>${maxPresses}</b> нажатий при лимите штрафов <b>${els.damageLimit.value}</b>. Проверено состояний: <b>${res.seen}</b>.`;
-      els.seq.textContent='—';
-      return;
-    }
-    const moves=res.actions.filter(a=>a.type==='move').length;
-    const dmg=res.actions.reduce((s,a)=>s+(a.damage||0),0);
-    els.summary.innerHTML=`Найдено решение: <b>${res.actions.length}</b> нажатий, из них <b>${moves}</b> движений пластин. Штрафов: <b>${dmg}</b>. Проверено состояний: <b>${res.seen}</b>.`;
-    els.seq.textContent=res.actions.length?res.actions.map(a=>a.action).join(' '):'Замок уже отцентрирован';
-    els.steps.innerHTML='';
-    res.actions.forEach((a,i)=>{
-      const li=document.createElement('li');
-      if(a.type==='select') li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать П${a.sel+1}; положение не меняется`;
-      else li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать П${a.plate+1}; ${changeText(a.before,a.s,a.plate,a.edgeHits)}; состояние: ${a.s.join(' · ')}`;
-      els.steps.appendChild(li);
-    });
-  }
-
-  function parseArrows(text){return [...text].filter(ch=>'↑↓←→'.includes(ch));}
-  function checkManualSequence(){
-    clearResult();
-    const actions=parseArrows(els.manualSeq.value);
-    let s=pos.slice(),sel=(Number(els.start.value)||1)-1,dmg=0;
-    const lines=[];
-    for(let i=0;i<actions.length;i++){
-      const a=actions[i];
-      if(a==='↑'||a==='↓'){
-        const ns=selectedAfter(sel,a);
-        if(ns===null){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">нельзя выбрать пластину за границей списка</span></div>`);break}
-        sel=ns;lines.push(`<div>${i+1}. <b>${a}</b> — выбрана П${sel+1}</div>`);continue;
-      }
-      const dir=a==='→'?1:-1;
-      const r=moveResult(s,sel,dir);
-      if(!r.ok){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">${r.reason}</span>; попытка состояния: ${r.after.join(' · ')}</div>`);break}
-      dmg+=r.damage;
-      lines.push(`<div>${i+1}. <b>${a}</b> — П${sel+1}; ${changeText(s,r.after,sel,r.edgeHits)}; состояние: ${r.after.join(' · ')}${r.damage?` · <span class="danger">штрафов всего: ${dmg}</span>`:''}</div>`);
-      s=r.after;
-    }
-    const ok=posKey(s)===posKey(Array.from({length:n},()=>CENTER));
-    els.simResult.hidden=false;
-    els.simResult.innerHTML=`<div>${ok?'<span class="ok">Финал достигнут</span>':'Финал не достигнут'} · штрафов: <b>${dmg}</b> · итог: ${s.join(' · ')}</div><hr style="border-color:var(--line)">${lines.join('')}`;
-  }
-
-  function demo(){
-    n=6;pos=[6,5,5,7,1,4];
-    // vertical input: effects[affected][mover]
-    effects=[
-      [1,0,1,0,0,0],
-      [0,1,0,0,0,0],
-      [0,1,1,0,1,0],
-      [1,0,-1,1,0,0],
-      [0,-1,0,1,1,0],
-      [0,0,0,0,0,1]
-    ];
-    els.count.value='6';els.limit.value='180';els.damageLimit.value='0';els.damageMode.value='enterEdge';els.upMode.value='next';
-    normalize(6);els.start.value='1';clearResult();render();
-  }
-  function reset(){
-    const c=parseInt(els.count.value,10)||6;n=c;pos=Array.from({length:n},()=>CENTER);effects=defaults(n);normalize(n);clearResult();render();
-  }
-
-  els.count.onchange=()=>{normalize(parseInt(els.count.value,10)||6);clearResult();render()};
-  els.start.onchange=clearResult;els.upMode.onchange=clearResult;els.damageLimit.onchange=clearResult;els.damageMode.onchange=clearResult;
-  $('solve').onclick=showSolution;$('checkSeq').onclick=checkManualSequence;$('demo').onclick=demo;$('reset').onclick=reset;
-  $('helpBtn').onclick=()=>$('dialog').showModal();$('closeDialog').onclick=()=>$('dialog').close();
-  normalize(n);render();
+const MIN=1,MAX=7,CENTER=4;let n=6,startPos=[6,5,5,7,1,4],effects=[],gameStart=null,gamePos=null,gameSelected=0,playerActions=[],lastGeneratedSolution=[];const $=id=>document.getElementById(id);const els={count:$('count'),start:$('startPlate'),upMode:$('upMode'),limit:$('limit'),difficulty:$('difficulty'),scrambleSteps:$('scrambleSteps'),startBoard:$('startBoard'),gameBoard:$('gameBoard'),matrix:$('matrix'),gameStatus:$('gameStatus'),gameHint:$('gameHint'),playerSeq:$('playerSeq'),solverBox:$('solverBox'),summary:$('summary'),solutionSeq:$('solutionSeq'),steps:$('steps'),manualSeq:$('manualSeq'),simResult:$('simResult')};
+function defaults(c){return Array.from({length:c},(_,a)=>Array.from({length:c},(_,m)=>a===m?1:0))}function normalize(c){n=Math.max(3,Math.min(6,c));startPos=Array.from({length:n},(_,i)=>startPos[i]??CENTER);const old=effects.length?effects:defaults(n);effects=Array.from({length:n},(_,a)=>Array.from({length:n},(_,m)=>a===m?1:(Number.isInteger(old[a]?.[m])?old[a][m]:0)));syncStartOptions();if(!gamePos)initGameFromStart(false)}function syncStartOptions(){const old=Number(els.start.value)||1;els.start.innerHTML='';for(let i=1;i<=n;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`Пластина ${i}`;els.start.appendChild(o)}els.start.value=String(Math.min(old,n))}const posKey=s=>s.join(','),targetKey=()=>posKey(Array.from({length:n},()=>CENTER)),isSolved=s=>posKey(s)===targetKey(),stateKey=(s,sel)=>`${posKey(s)}|${sel}`;function directionToCenter(value){if(value<CENTER)return 1;if(value>CENTER)return-1;return 0}function selectedAfter(sel,sym){const upNext=els.upMode.value==='next';const delta=(sym==='↑')===(upNext)?1:-1;const nxt=sel+delta;return nxt>=0&&nxt<n?nxt:null}function moveResult(s,mover,dir,strictSelected=true){effects[mover][mover]=1;if(strictSelected){const needed=directionToCenter(s[mover]);if(needed===0)return{ok:false,after:s.slice(),reason:`П${mover+1} уже в центре, двигать её нельзя`};if(dir!==needed)return{ok:false,after:s.slice(),reason:`П${mover+1} должна двигаться к 4, а этот ход уводит её от цели`}}const after=s.map((p,a)=>p+dir*effects[a][mover]);const bad=after.findIndex(x=>x<MIN||x>MAX);if(bad>=0)return{ok:false,after,reason:`П${bad+1} выходит за диапазон 1–7`};return{ok:true,after,before:s.slice(),mover,dir}}function reverseMoveResult(s,mover,dir){effects[mover][mover]=1;const after=s.map((p,a)=>p+dir*effects[a][mover]);if(after.some(x=>x<MIN||x>MAX))return null;if(Math.abs(after[mover]-CENTER)<=Math.abs(s[mover]-CENTER))return null;return after}
+function renderBoard(container,positions,selected=null,clickable=false){container.innerHTML='';const board=document.createDocumentFragment();positions.forEach((p,i)=>{const plate=document.createElement('div');plate.className='plate'+(selected===i?' selected':'');const title=document.createElement('div');title.className='plate-name';title.textContent=`П${i+1}`;plate.appendChild(title);for(let s=1;s<=7;s++){const slot=document.createElement('button');slot.type='button';slot.className=['slot',s===MIN||s===MAX?'edge':'',s===CENTER?'target':'',s===p?'active':''].join(' ');slot.textContent=String(s);slot.disabled=!clickable;if(clickable)slot.onclick=()=>{startPos[i]=s;clearOutputs();initGameFromStart(false);renderAll()};plate.appendChild(slot)}board.appendChild(plate)});container.appendChild(board)}function label(v){return v===1?'→':v===-1?'←':'—'}function cls(v,locked=false){return locked?'locked':(v===1?'same':v===-1?'opp':'none')}function next(v){return v===0?1:v===1?-1:0}function th(t,sticky=false){const e=document.createElement('th');e.textContent=t;if(sticky)e.className='sticky-left';return e}function renderMatrix(){els.matrix.innerHTML='';const thead=document.createElement('thead'),hr=document.createElement('tr');hr.appendChild(th('Меняется ↓ / двигаем →',true));for(let m=0;m<n;m++)hr.appendChild(th(`Двигаем П${m+1}`));thead.appendChild(hr);els.matrix.appendChild(thead);const tb=document.createElement('tbody');for(let a=0;a<n;a++){const tr=document.createElement('tr');tr.appendChild(th(`Меняется П${a+1}`,true));for(let m=0;m<n;m++){const td=document.createElement('td'),b=document.createElement('button'),locked=a===m;if(locked)effects[a][m]=1;b.type='button';b.className=`cell ${cls(effects[a][m],locked)}`;b.textContent=locked?'сам →':label(effects[a][m]);b.disabled=locked;b.title=locked?'Выбранная пластина всегда движется в сторону нажатия':'Клик: нет связи / вправо / влево';if(!locked)b.onclick=()=>{effects[a][m]=next(effects[a][m]);clearOutputs();renderMatrix()};td.appendChild(b);tr.appendChild(td)}tb.appendChild(tr)}els.matrix.appendChild(tb)}function renderAll(){renderBoard(els.startBoard,startPos,null,true);renderBoard(els.gameBoard,gamePos||startPos,gameSelected,false);renderMatrix();renderPlayerSeq()}function clearOutputs(){els.solverBox.hidden=true;els.summary.textContent='';els.solutionSeq.textContent='';els.steps.innerHTML='';els.simResult.hidden=true;els.simResult.textContent=''}
+function buildPath(prev,last,seen){const actions=[];let k=last;while(prev.get(k)){actions.push(prev.get(k));k=prev.get(k).prev}actions.reverse();return{ok:true,actions,seen}}function solveModel(start=startPos,startSel=(Number(els.start.value)||1)-1,maxPresses=parseInt(els.limit.value,10)||220){const q=[{s:start.slice(),sel:startSel}],prev=new Map([[stateKey(start,startSel),null]]),depth=new Map([[stateKey(start,startSel),0]]);let qi=0;while(qi<q.length){const cur=q[qi++],ck=stateKey(cur.s,cur.sel),d=depth.get(ck);if(isSolved(cur.s))return buildPath(prev,ck,prev.size);if(d>=maxPresses)continue;for(const sym of ['↑','↓']){const ns=selectedAfter(cur.sel,sym);if(ns===null)continue;const nk=stateKey(cur.s,ns);if(!prev.has(nk)){prev.set(nk,{prev:ck,action:sym,type:'select',sel:ns,s:cur.s.slice()});depth.set(nk,d+1);q.push({s:cur.s.slice(),sel:ns})}}for(const [sym,dir]of[['→',1],['←',-1]]){const r=moveResult(cur.s,cur.sel,dir,true);if(!r.ok)continue;const nk=stateKey(r.after,cur.sel);if(!prev.has(nk)){prev.set(nk,{prev:ck,action:sym,type:'move',plate:cur.sel,dir,s:r.after.slice(),before:cur.s.slice()});depth.set(nk,d+1);q.push({s:r.after,sel:cur.sel})}}}return{ok:false,actions:[],seen:prev.size}}function changeText(before,after,mover){const changes=after.map((v,i)=>{if(v===before[i])return null;const why=i===mover?'сама выбранная пластина':`влияние из колонки П${mover+1}`;return`<span class="changed">П${i+1}: ${before[i]}→${v}</span> (${why})`}).filter(Boolean);return changes.length?changes.join('; '):'изменений нет'}function showSolution(){clearOutputs();const res=solveModel();els.solverBox.hidden=false;if(!res.ok){els.summary.innerHTML=`Решение не найдено до лимита <b>${els.limit.value}</b> нажатий. Проверено состояний: <b>${res.seen}</b>.`;els.solutionSeq.textContent='—';return}lastGeneratedSolution=res.actions;const moves=res.actions.filter(a=>a.type==='move').length;els.summary.innerHTML=`Найдено решение: <b>${res.actions.length}</b> нажатий, из них <b>${moves}</b> движений пластин. Проверено состояний: <b>${res.seen}</b>.`;els.solutionSeq.textContent=res.actions.length?res.actions.map(a=>a.action).join(' '):'Замок уже собран';els.steps.innerHTML='';res.actions.forEach((a,i)=>{const li=document.createElement('li');if(a.type==='select')li.innerHTML=`${i+1}. <b>${a.action}</b> — выбрать П${a.sel+1}; положение не меняется`;else li.innerHTML=`${i+1}. <b>${a.action}</b> — двигать П${a.plate+1}; ${changeText(a.before,a.s,a.plate)}; состояние: ${a.s.join(' · ')}`;els.steps.appendChild(li)})}
+function initGameFromStart(resetSeq=true){gameStart=startPos.slice();gamePos=startPos.slice();gameSelected=(Number(els.start.value)||1)-1;if(resetSeq)playerActions=[];updateGameStatus()}function renderPlayerSeq(){els.playerSeq.textContent=playerActions.length?playerActions.join(' '):'—'}function updateGameStatus(message=''){if(!gamePos)return;if(isSolved(gamePos)){els.gameStatus.textContent='замок собран';els.gameStatus.className='status ok';els.gameHint.textContent=`Готово. Твой ход: ${playerActions.join(' ')||'—'}`}else{els.gameStatus.textContent='идёт игра';els.gameStatus.className='status';els.gameHint.textContent=message||`Выбрана П${gameSelected+1}. Нажимай стрелки на клавиатуре.`}}function gameSelect(sym){const ns=selectedAfter(gameSelected,sym);if(ns===null){updateGameStatus('Нельзя выбрать пластину за границей списка.');return}gameSelected=ns;playerActions.push(sym);updateGameStatus();renderAll()}function gameMove(sym){const dir=sym==='→'?1:-1;const r=moveResult(gamePos,gameSelected,dir,true);if(!r.ok){updateGameStatus(`Ход ${sym} невозможен: ${r.reason}. Состояние не изменилось.`);renderAll();return}gamePos=r.after;playerActions.push(sym);updateGameStatus();renderAll()}function handleKey(e){if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement.tagName))return;const map={ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→'},sym=map[e.key];if(!sym)return;e.preventDefault();if(sym==='↑'||sym==='↓')gameSelect(sym);else gameMove(sym)}
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}function difficultyConfig(){const d=els.difficulty.value;if(d==='easy')return{extraMin:0,extraMax:1,tries:180,defaultSteps:8};if(d==='hard')return{extraMin:2,extraMax:3,tries:500,defaultSteps:22};return{extraMin:1,extraMax:2,tries:320,defaultSteps:16}}function randomEffects(){const cfg=difficultyConfig(),m=defaults(n);for(let mover=0;mover<n;mover++){const count=randomInt(cfg.extraMin,cfg.extraMax),candidates=Array.from({length:n},(_,i)=>i).filter(i=>i!==mover);for(let k=0;k<count&&candidates.length;k++){const idx=randomInt(0,candidates.length-1),affected=candidates.splice(idx,1)[0];m[affected][mover]=Math.random()<.5?1:-1}}return m}function generatePuzzle(){const cfg=difficultyConfig(),targetSteps=Math.max(4,Math.min(40,parseInt(els.scrambleSteps.value,10)||cfg.defaultSteps));for(let attempt=0;attempt<cfg.tries;attempt++){effects=randomEffects();let s=Array.from({length:n},()=>CENTER),applied=0;for(let step=0;step<targetSteps*4&&applied<targetSteps;step++){const mover=randomInt(0,n-1),dirs=[-1,1].sort(()=>Math.random()-.5);for(const dir of dirs){const after=reverseMoveResult(s,mover,dir);if(after){s=after;applied++;break}}}if(applied<Math.ceil(targetSteps*.55)||isSolved(s))continue;const res=solveModel(s,(Number(els.start.value)||1)-1,parseInt(els.limit.value,10)||220);if(res.ok&&res.actions.filter(a=>a.type==='move').length>=Math.min(4,applied)){startPos=s.slice();gameStart=startPos.slice();gamePos=startPos.slice();gameSelected=(Number(els.start.value)||1)-1;playerActions=[];lastGeneratedSolution=res.actions;clearOutputs();updateGameStatus(`Сгенерирован решаемый замок. Решение решателя: ${res.actions.length} нажатий.`);renderAll();return}}updateGameStatus('Не удалось сгенерировать решаемый замок с этими параметрами. Попробуй меньшую длину или другую сложность.');renderAll()}
+function parseArrows(text){return[...text].filter(ch=>'↑↓←→'.includes(ch))}function checkSequence(){clearOutputs();const actions=parseArrows(els.manualSeq.value);let s=startPos.slice(),sel=(Number(els.start.value)||1)-1;const lines=[];for(let i=0;i<actions.length;i++){const a=actions[i];if(a==='↑'||a==='↓'){const ns=selectedAfter(sel,a);if(ns===null){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">нельзя выбрать пластину за границей списка</span></div>`);break}sel=ns;lines.push(`<div>${i+1}. <b>${a}</b> — выбрана П${sel+1}</div>`);continue}const dir=a==='→'?1:-1,r=moveResult(s,sel,dir,true);if(!r.ok){lines.push(`<div><b>${i+1}. ${a}</b> — <span class="danger">${r.reason}</span>; состояние осталось: ${s.join(' · ')}</div>`);break}lines.push(`<div>${i+1}. <b>${a}</b> — П${sel+1}; ${changeText(s,r.after,sel)}; состояние: ${r.after.join(' · ')}</div>`);s=r.after}const ok=isSolved(s);els.simResult.hidden=false;els.simResult.innerHTML=`<div>${ok?'<span class="ok">Финал достигнут</span>':'Финал не достигнут'} · итог: ${s.join(' · ')}</div><hr style="border-color:var(--line)">${lines.join('')}`}
+function demo(){n=6;startPos=[6,5,5,7,1,4];effects=[[1,0,1,0,0,0],[0,1,0,0,0,0],[0,1,1,0,1,0],[1,0,-1,1,0,0],[0,-1,0,1,1,0],[0,0,0,0,0,1]];els.count.value='6';els.limit.value='220';els.upMode.value='next';normalize(6);els.start.value='1';initGameFromStart(true);clearOutputs();renderAll()}function reset(){const c=parseInt(els.count.value,10)||6;n=c;startPos=Array.from({length:n},()=>CENTER);effects=defaults(n);normalize(n);initGameFromStart(true);clearOutputs();renderAll()}function copyText(text){if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text)}els.count.onchange=()=>{normalize(parseInt(els.count.value,10)||6);initGameFromStart(true);clearOutputs();renderAll()};els.start.onchange=()=>{initGameFromStart(true);clearOutputs();renderAll()};els.upMode.onchange=()=>{clearOutputs();updateGameStatus();renderAll()};$('solve').onclick=showSolution;$('generate').onclick=generatePuzzle;$('startGame').onclick=()=>{initGameFromStart(true);clearOutputs();renderAll()};$('resetGame').onclick=()=>{if(gameStart){gamePos=gameStart.slice();gameSelected=(Number(els.start.value)||1)-1;playerActions=[];updateGameStatus();renderAll()}};$('clearPlayerSeq').onclick=()=>{playerActions=[];renderPlayerSeq();updateGameStatus('Ход очищен. Положение замка не изменилось.')};$('copyPlayerSeq').onclick=()=>copyText(playerActions.join(' '));$('checkSeq').onclick=checkSequence;$('demo').onclick=demo;$('reset').onclick=reset;$('helpBtn').onclick=()=>$('dialog').showModal();$('closeDialog').onclick=()=>$('dialog').close();document.addEventListener('keydown',handleKey);normalize(n);initGameFromStart(true);renderAll();
 </script>
 </body>
 </html>
